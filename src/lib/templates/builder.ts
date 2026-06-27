@@ -2,12 +2,29 @@ import { createElement } from '@/lib/core/defaults'
 import type { UIElement } from '@/lib/core/types'
 import { udim, udim2Offset } from '@/lib/core/utils'
 import type { StylePalette } from './styles'
-import { PAD, PHONE_H, PHONE_W } from './styles'
+import { DESKTOP_H, DESKTOP_W, PAD } from './styles'
 
 type Els = Record<string, UIElement>
 
+export const CANVAS_W = DESKTOP_W
+export const CANVAS_H = DESKTOP_H
+
 export function cx(w: number) {
-  return Math.round((PHONE_W - w) / 2)
+  return Math.round((CANVAS_W - w) / 2)
+}
+
+export function cy(h: number) {
+  return Math.round((CANVAS_H - h) / 2)
+}
+
+/** Width of a full-width panel (screen margins) */
+export function panelW() {
+  return CANVAS_W - PAD * 2
+}
+
+/** Inner content width inside a screenPanel */
+export function panelInnerW() {
+  return CANVAS_W - PAD * 4
 }
 
 export function addChild(parentId: string, elements: Els, el: UIElement): UIElement {
@@ -95,7 +112,7 @@ export function txt(
     backgroundTransparency: 1,
     textColor3: palette.text,
     font: palette.fontBody,
-    textSize: 14,
+    textSize: 16,
     ...opts,
   }))
 }
@@ -109,9 +126,9 @@ export function title(
   y: number,
   w: number,
 ) {
-  return txt(parent, els, palette, 'Title', text, x, y, w, 32, {
+  return txt(parent, els, palette, 'Title', text, x, y, w, 40, {
     font: palette.fontTitle,
-    textSize: palette.fontTitle === 'Code' ? 16 : 22,
+    textSize: palette.fontTitle === 'Code' ? 20 : 28,
   })
 }
 
@@ -134,12 +151,12 @@ export function btn(
   return addChild(parent, els, createElement('TextButton', {
     name,
     text: palette.fontTitle === 'Code' ? text.toUpperCase() : text,
-    size: udim2Offset(w, 46),
+    size: udim2Offset(w, 52),
     position: udim2Offset(x, y),
     backgroundColor3: colors[variant],
     textColor3: variant === 'secondary' ? palette.muted : palette.text,
     font: palette.fontTitle,
-    textSize: palette.fontTitle === 'Code' ? 13 : 15,
+    textSize: palette.fontTitle === 'Code' ? 15 : 17,
     ...corner(palette),
     ...borderStroke(palette),
   }))
@@ -184,10 +201,10 @@ export function slotGrid(
   }
 }
 
-/** Full-screen panel with standard phone margins */
-export function screenPanel(parent: string, els: Els, palette: StylePalette, name: string, top = 48) {
-  const w = PHONE_W - PAD * 2
-  const h = PHONE_H - top - PAD
+/** Full-screen panel with standard desktop margins */
+export function screenPanel(parent: string, els: Els, palette: StylePalette, name: string, top = 40) {
+  const w = panelW()
+  const h = CANVAS_H - top - PAD
   return box(parent, els, palette, name, PAD, top, w, h)
 }
 
@@ -202,11 +219,11 @@ export function hudBar(
   fillPct: number,
   fillColor = palette.accent2,
 ) {
-  const bar = raised(parent, els, palette, name, x, y, w, 22)
+  const bar = raised(parent, els, palette, name, x, y, w, 28)
   addChild(bar.id, els, createElement('Frame', {
     name: 'Fill',
-    size: udim2Offset(Math.round((w - 8) * fillPct), 14),
-    position: udim2Offset(4, 4),
+    size: udim2Offset(Math.round((w - 10) * fillPct), 18),
+    position: udim2Offset(5, 5),
     backgroundColor3: fillColor,
     ...corner(palette),
   }))

@@ -8,6 +8,7 @@ import type {
   UIElement,
 } from '../core/types'
 import { DEVICE_PRESETS } from '../core/types'
+import { resizeProjectElements } from '../core/device-resize'
 import { createElement, createEmptyProject } from '../core/defaults'
 import { getParentDimensions, isGuiObject, udim2Offset } from '../core/utils'
 
@@ -415,12 +416,21 @@ export const useEditorStore = create<EditorState & EditorActions>()(
       get().pushHistory()
     },
 
-    setDevicePreview: (device) =>
+    setDevicePreview: (device) => {
+      const from = get().project.devicePreview
+      if (from === device) return
+
       set((state) => {
+        const newPreset = DEVICE_PRESETS[device]
+        resizeProjectElements(state.project.elements, from, device)
         state.project.devicePreview = device
         state.project.updatedAt = new Date().toISOString()
         state.isDirty = true
-      }),
+        const zoom = Math.min(1.25, 720 / newPreset.width)
+        state.viewport = { zoom, panX: 60, panY: 32 }
+      })
+      get().pushHistory()
+    },
 
     setViewport: (viewport) =>
       set((state) => {

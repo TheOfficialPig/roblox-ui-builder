@@ -11,10 +11,15 @@ export const CATEGORY_LABELS: Record<TemplateCategory, string> = {
   lowpoly: 'Low Poly',
 }
 
-/** Phone canvas — most Roblox UIs target mobile */
-export const PHONE_W = 390
-export const PHONE_H = 844
-export const PAD = 16
+/** Desktop canvas — 1920×1080 landscape */
+export const DESKTOP_W = 1920
+export const DESKTOP_H = 1080
+export const PAD = 24
+
+/** @deprecated Use DESKTOP_W */
+export const PHONE_W = DESKTOP_W
+/** @deprecated Use DESKTOP_H */
+export const PHONE_H = DESKTOP_H
 
 export interface StylePalette {
   bg: Color3

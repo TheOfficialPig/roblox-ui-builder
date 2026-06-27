@@ -61,8 +61,8 @@ function PhonePreview({
   const isMenu = templateId.includes('menu') || templateId.includes('pause') || templateId.includes('gameover')
 
   return (
-    <div className="relative h-full w-[72px] rounded-lg border-2 border-white/20 bg-black/40 shadow-lg">
-      <div className="absolute inset-x-2 top-1.5 h-1 rounded-full bg-white/15" />
+    <div className="relative h-full w-[96px] rounded-lg border-2 border-white/20 bg-black/40 shadow-lg">
+      <div className="absolute inset-x-3 top-1.5 h-1 rounded-full bg-white/15" />
       <div className="absolute inset-2 top-4 flex flex-col gap-1">
         {isHud ? (
           <>

@@ -6,25 +6,30 @@ import {
   box,
   btn,
   cx,
+  cy,
   hudBar,
+  panelInnerW,
+  panelW,
   raised,
   screenPanel,
   slotGrid,
   title,
   txt,
   addChild,
+  CANVAS_H,
+  CANVAS_W,
 } from './builder'
 import {
   CATEGORY_LABELS,
   PAD,
   PALETTES,
-  PHONE_H,
-  PHONE_W,
   TEMPLATE_CATEGORIES,
   type TemplateCategory,
 } from './styles'
 
 export { CATEGORY_LABELS, TEMPLATE_CATEGORIES, type TemplateCategory }
+
+const INNER = panelInnerW()
 
 function build(
   name: string,
@@ -39,7 +44,7 @@ function build(
     name,
     elements,
     rootIds: [screenGui.id],
-    devicePreview: 'phone',
+    devicePreview: 'desktop',
     version: 1,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -51,87 +56,97 @@ export const TEMPLATE_CATALOG = [
   {
     id: 'modern-menu',
     name: 'Main Menu',
-    description: 'Centered menu with play, shop, and settings',
+    description: 'Centered desktop menu with play, shop, and settings',
     category: 'modern' as const,
     build: () =>
       build('Main Menu', 'modern', (root, els, p) => {
         bg(root, els, p)
-        const card = box(root, els, p, 'MenuCard', cx(320), 200, 320, 400)
-        title(card.id, els, p, 'MY GAME', PAD, 24, 320 - PAD * 2)
-        txt(card.id, els, p, 'Subtitle', 'Tap a button to start', PAD, 58, 288, 20, {
-          textSize: 12,
+        const cardW = 440
+        const cardH = 480
+        const card = box(root, els, p, 'MenuCard', cx(cardW), cy(cardH), cardW, cardH)
+        const inner = cardW - PAD * 2
+        title(card.id, els, p, 'MY GAME', PAD, 32, inner)
+        txt(card.id, els, p, 'Subtitle', 'Select an option to continue', PAD, 78, inner, 24, {
+          textSize: 14,
           textColor3: p.muted,
         })
-        btn(card.id, els, p, 'Play', 'Play', PAD, 110, 288, 'success')
-        btn(card.id, els, p, 'Shop', 'Shop', PAD, 170, 288, 'primary')
-        btn(card.id, els, p, 'Settings', 'Settings', PAD, 230, 288, 'secondary')
+        btn(card.id, els, p, 'Play', 'Play', PAD, 140, inner, 'success')
+        btn(card.id, els, p, 'Shop', 'Shop', PAD, 208, inner, 'primary')
+        btn(card.id, els, p, 'Settings', 'Settings', PAD, 276, inner, 'secondary')
       }),
   },
   {
     id: 'modern-shop',
     name: 'Shop',
-    description: 'Full-screen shop with item cards and currency',
+    description: 'Wide shop grid with item cards and currency bar',
     category: 'modern' as const,
     build: () =>
       build('Shop', 'modern', (root, els, p) => {
         bg(root, els, p)
-        const panel = screenPanel(root, els, p, 'Shop', 40)
-        title(panel.id, els, p, 'ITEM SHOP', PAD, PAD, 200)
-        txt(panel.id, els, p, 'Coins', '💰 1,250', 220, PAD + 4, 100, 24, {
+        const panel = screenPanel(root, els, p, 'Shop', 28)
+        title(panel.id, els, p, 'ITEM SHOP', PAD, PAD, 320)
+        txt(panel.id, els, p, 'Coins', '💰 12,500', INNER - 180, PAD + 4, 160, 32, {
           font: p.fontTitle,
-          textSize: 14,
+          textSize: 18,
         })
+        const gap = 20
+        const cardW = Math.floor((INNER - gap * 3) / 4)
+        const cardH = 340
         for (let i = 0; i < 4; i++) {
-          const col = i % 2
-          const row = Math.floor(i / 2)
           const card = raised(
             panel.id,
             els,
             p,
             `Item${i + 1}`,
-            PAD + col * 168,
-            80 + row * 200,
-            156,
-            184,
+            PAD + i * (cardW + gap),
+            88,
+            cardW,
+            cardH,
           )
-          raised(card.id, els, p, 'Thumb', 12, 12, 132, 90)
-          txt(card.id, els, p, 'Name', `Item ${i + 1}`, 12, 110, 132, 20, { font: p.fontTitle, textSize: 13 })
-          txt(card.id, els, p, 'Price', '250 coins', 12, 132, 132, 16, { textSize: 11, textColor3: p.muted })
-          btn(card.id, els, p, 'Buy', 'Buy', 12, 148, 132)
+          raised(card.id, els, p, 'Thumb', 16, 16, cardW - 32, 180)
+          txt(card.id, els, p, 'Name', `Item ${i + 1}`, 16, 210, cardW - 32, 24, {
+            font: p.fontTitle,
+            textSize: 16,
+          })
+          txt(card.id, els, p, 'Price', '1,250 coins', 16, 240, cardW - 32, 20, {
+            textSize: 13,
+            textColor3: p.muted,
+          })
+          btn(card.id, els, p, 'Buy', 'Buy', 16, 278, cardW - 32)
         }
       }),
   },
   {
     id: 'modern-inventory',
     name: 'Inventory',
-    description: '12-slot inventory grid',
+    description: '40-slot inventory grid for desktop',
     category: 'modern' as const,
     build: () =>
       build('Inventory', 'modern', (root, els, p) => {
         bg(root, els, p)
-        const panel = screenPanel(root, els, p, 'Inventory', 56)
-        title(panel.id, els, p, 'INVENTORY', PAD, PAD, 250)
-        txt(panel.id, els, p, 'Count', '12 / 24 slots', 220, PAD + 4, 100, 20, {
-          textSize: 12,
+        const panel = screenPanel(root, els, p, 'Inventory', 36)
+        title(panel.id, els, p, 'INVENTORY', PAD, PAD, 400)
+        txt(panel.id, els, p, 'Count', '40 / 80 slots', INNER - 200, PAD + 4, 180, 28, {
+          textSize: 14,
           textColor3: p.muted,
         })
-        slotGrid(panel.id, els, p, 4, 72, 10, PAD, 56, 12)
+        slotGrid(panel.id, els, p, 10, 88, 14, PAD, 72, 40)
       }),
   },
   {
     id: 'modern-settings',
     name: 'Settings',
-    description: 'Audio and graphics toggles',
+    description: 'Full-width audio and graphics settings',
     category: 'modern' as const,
     build: () =>
       build('Settings', 'modern', (root, els, p) => {
         bg(root, els, p)
-        const panel = screenPanel(root, els, p, 'Settings', 80)
-        title(panel.id, els, p, 'SETTINGS', PAD, PAD, 250)
-        ;['Music', 'Sound Effects', 'Graphics'].forEach((label, i) => {
-          const row = raised(panel.id, els, p, label.replace(' ', ''), PAD, 56 + i * 60, 358 - PAD * 2, 48)
-          txt(row.id, els, p, 'Label', label, 12, 0, 200, 48, { font: p.fontTitle, textSize: 14 })
-          box(row.id, els, p, 'Toggle', 290, 12, 44, 24, { backgroundColor3: p.accent })
+        const panel = screenPanel(root, els, p, 'Settings', 48)
+        title(panel.id, els, p, 'SETTINGS', PAD, PAD, 400)
+        ;['Music', 'Sound Effects', 'Graphics', 'Fullscreen'].forEach((label, i) => {
+          const row = raised(panel.id, els, p, label.replace(' ', ''), PAD, 72 + i * 72, INNER, 56)
+          txt(row.id, els, p, 'Label', label, 20, 0, 400, 56, { font: p.fontTitle, textSize: 18 })
+          box(row.id, els, p, 'Toggle', INNER - 88, 14, 56, 28, { backgroundColor3: p.accent })
         })
       }),
   },
@@ -140,44 +155,45 @@ export const TEMPLATE_CATALOG = [
   {
     id: 'retro-menu',
     name: 'Arcade Menu',
-    description: 'Retro arcade title screen with coin counter',
+    description: 'Retro arcade title screen for desktop',
     category: 'retro' as const,
     build: () =>
       build('Arcade Menu', 'retro', (root, els, p) => {
         bg(root, els, p)
-        txt(root, els, p, 'CoinLabel', 'COINS: 99', cx(200), 48, 200, 28, {
+        txt(root, els, p, 'CoinLabel', 'COINS: 99', cx(240), 48, 240, 32, {
           font: p.fontTitle,
-          textSize: 18,
+          textSize: 22,
           textColor3: p.accent,
         })
-        title(root, els, p, 'ARCADE GAME', cx(300), 140, 300)
-        txt(root, els, p, 'Insert', 'INSERT COIN', cx(200), 190, 200, 24, {
-          textSize: 14,
+        title(root, els, p, 'ARCADE GAME', cx(520), 160, 520)
+        txt(root, els, p, 'Insert', 'INSERT COIN', cx(280), 215, 280, 28, {
+          textSize: 16,
           textColor3: p.muted,
         })
-        btn(root, els, p, 'Start', 'START', cx(260), 280, 260, 'success')
-        btn(root, els, p, 'Scores', 'HIGH SCORES', cx(260), 340, 260, 'primary')
-        btn(root, els, p, 'Exit', 'EXIT', cx(260), 400, 260, 'secondary')
+        const btnW = 360
+        btn(root, els, p, 'Start', 'START', cx(btnW), 280, btnW, 'success')
+        btn(root, els, p, 'Scores', 'HIGH SCORES', cx(btnW), 350, btnW, 'primary')
+        btn(root, els, p, 'Exit', 'EXIT', cx(btnW), 420, btnW, 'secondary')
       }),
   },
   {
     id: 'retro-leaderboard',
     name: 'Leaderboard',
-    description: 'High score table with top 5 players',
+    description: 'Wide high-score table with top 5 players',
     category: 'retro' as const,
     build: () =>
       build('Leaderboard', 'retro', (root, els, p) => {
         bg(root, els, p)
-        const panel = screenPanel(root, els, p, 'Leaderboard', 64)
-        title(panel.id, els, p, 'HIGH SCORES', PAD, PAD, 300)
+        const panel = screenPanel(root, els, p, 'Leaderboard', 40)
+        title(panel.id, els, p, 'HIGH SCORES', PAD, PAD, 480)
         const names = ['AAA', 'YOU', 'BOT', 'ACE', 'PRO']
-        const scores = ['9999', '8420', '7100', '6500', '5200']
+        const scores = ['99999', '84200', '71000', '65000', '52000']
         names.forEach((n, i) => {
-          const row = raised(panel.id, els, p, `Row${i + 1}`, PAD, 52 + i * 52, 358 - PAD * 2, 44)
-          txt(row.id, els, p, 'Rank', `${i + 1}. ${n}`, 12, 0, 180, 44, { font: p.fontTitle, textSize: 14 })
-          txt(row.id, els, p, 'Score', scores[i], 200, 0, 120, 44, {
+          const row = raised(panel.id, els, p, `Row${i + 1}`, PAD, 64 + i * 64, INNER, 52)
+          txt(row.id, els, p, 'Rank', `${i + 1}. ${n}`, 20, 0, 500, 52, { font: p.fontTitle, textSize: 18 })
+          txt(row.id, els, p, 'Score', scores[i], INNER - 200, 0, 180, 52, {
             font: p.fontTitle,
-            textSize: 14,
+            textSize: 18,
             textColor3: p.accent,
           })
         })
@@ -186,15 +202,17 @@ export const TEMPLATE_CATALOG = [
   {
     id: 'retro-dialog',
     name: 'Dialog Box',
-    description: 'Bottom NPC dialog with continue button',
+    description: 'Bottom NPC dialog bar across the screen',
     category: 'retro' as const,
     build: () =>
       build('Dialog Box', 'retro', (root, els, p) => {
         bg(root, els, p)
-        const dialog = box(root, els, p, 'Dialog', PAD, PHONE_H - 200, PHONE_W - PAD * 2, 160)
-        txt(dialog.id, els, p, 'Speaker', 'NPC:', PAD, 12, 80, 20, {
+        const dialogH = 180
+        const dialog = box(root, els, p, 'Dialog', PAD, CANVAS_H - dialogH - PAD, panelW(), dialogH)
+        const inner = panelW() - PAD * 2
+        txt(dialog.id, els, p, 'Speaker', 'NPC:', PAD, 16, 120, 24, {
           font: p.fontTitle,
-          textSize: 14,
+          textSize: 16,
           textColor3: p.accent,
         })
         txt(
@@ -202,20 +220,20 @@ export const TEMPLATE_CATALOG = [
           els,
           p,
           'Text',
-          'Welcome, hero! Press continue to begin your quest.',
+          'Welcome, hero! The kingdom needs your help. Press continue to begin your quest.',
           PAD,
-          36,
-          358 - PAD * 2,
-          60,
-          { textWrapped: true, textSize: 14 },
+          48,
+          inner - 160,
+          72,
+          { textWrapped: true, textSize: 16 },
         )
-        btn(dialog.id, els, p, 'Continue', 'CONTINUE', 358 - PAD - 130, 108, 130)
+        btn(dialog.id, els, p, 'Continue', 'CONTINUE', inner - 160, dialogH - PAD - 52, 160)
       }),
   },
   {
     id: 'retro-pause',
     name: 'Pause Menu',
-    description: 'Pause overlay with resume and quit',
+    description: 'Centered pause overlay for desktop',
     category: 'retro' as const,
     build: () =>
       build('Pause Menu', 'retro', (root, els, p) => {
@@ -229,11 +247,14 @@ export const TEMPLATE_CATALOG = [
             backgroundTransparency: 0.4,
           }),
         )
-        const menu = box(root, els, p, 'PauseMenu', cx(280), 260, 280, 320)
-        title(menu.id, els, p, 'PAUSED', PAD, 24, 248)
-        btn(menu.id, els, p, 'Resume', 'RESUME', PAD, 90, 248, 'success')
-        btn(menu.id, els, p, 'Settings', 'SETTINGS', PAD, 150, 248, 'primary')
-        btn(menu.id, els, p, 'Quit', 'QUIT', PAD, 210, 248, 'secondary')
+        const menuW = 400
+        const menuH = 400
+        const menu = box(root, els, p, 'PauseMenu', cx(menuW), cy(menuH), menuW, menuH)
+        const inner = menuW - PAD * 2
+        title(menu.id, els, p, 'PAUSED', PAD, 32, inner)
+        btn(menu.id, els, p, 'Resume', 'RESUME', PAD, 110, inner, 'success')
+        btn(menu.id, els, p, 'Settings', 'SETTINGS', PAD, 180, inner, 'primary')
+        btn(menu.id, els, p, 'Quit', 'QUIT', PAD, 250, inner, 'secondary')
       }),
   },
 
@@ -241,36 +262,39 @@ export const TEMPLATE_CATALOG = [
   {
     id: 'pixel-menu',
     name: 'Pixel Menu',
-    description: '8-bit style main menu',
+    description: '8-bit style desktop main menu',
     category: 'pixel' as const,
     build: () =>
       build('Pixel Menu', 'pixel', (root, els, p) => {
         bg(root, els, p)
-        title(root, els, p, 'PIXEL QUEST', cx(280), 160, 280)
-        txt(root, els, p, 'Sub', 'v1.0', cx(100), 200, 100, 20, { textSize: 12, textColor3: p.muted })
-        btn(root, els, p, 'Play', 'PLAY', cx(240), 280, 240, 'success')
-        btn(root, els, p, 'Load', 'LOAD', cx(240), 340, 240, 'primary')
-        btn(root, els, p, 'Quit', 'QUIT', cx(240), 400, 240, 'secondary')
+        title(root, els, p, 'PIXEL QUEST', cx(480), 200, 480)
+        txt(root, els, p, 'Sub', 'v1.0', cx(120), 250, 120, 24, { textSize: 14, textColor3: p.muted })
+        const btnW = 320
+        btn(root, els, p, 'Play', 'PLAY', cx(btnW), 320, btnW, 'success')
+        btn(root, els, p, 'Load', 'LOAD', cx(btnW), 390, btnW, 'primary')
+        btn(root, els, p, 'Quit', 'QUIT', cx(btnW), 460, btnW, 'secondary')
       }),
   },
   {
     id: 'pixel-hud',
     name: 'Pixel HUD',
-    description: 'Health bar and coin counter',
+    description: 'Desktop health bar, mana, and coin counter',
     category: 'pixel' as const,
     build: () =>
       build('Pixel HUD', 'pixel', (root, els, p) => {
         bg(root, els, p)
-        txt(root, els, p, 'HPLabel', 'HP', PAD, 20, 30, 20, { font: p.fontTitle, textSize: 12 })
-        hudBar(root, els, p, 'HealthBar', 50, 18, 180, 0.75, p.accent2)
-        txt(root, els, p, 'HPVal', '75/100', 240, 18, 80, 22, { font: p.fontTitle, textSize: 12 })
-        raised(root, els, p, 'Coins', PHONE_W - PAD - 120, 16, 120, 28)
-        txt(root, els, p, 'CoinText', 'G 1,250', PHONE_W - PAD - 112, 18, 104, 24, {
+        txt(root, els, p, 'HPLabel', 'HP', PAD, 24, 40, 24, { font: p.fontTitle, textSize: 14 })
+        hudBar(root, els, p, 'HealthBar', 72, 22, 360, 0.75, p.accent2)
+        txt(root, els, p, 'HPVal', '75/100', 448, 22, 100, 28, { font: p.fontTitle, textSize: 14 })
+        txt(root, els, p, 'MPLabel', 'MP', PAD, 60, 40, 24, { font: p.fontTitle, textSize: 14 })
+        hudBar(root, els, p, 'ManaBar', 72, 58, 360, 0.5, p.accent)
+        raised(root, els, p, 'Coins', CANVAS_W - PAD - 200, 20, 200, 36)
+        txt(root, els, p, 'CoinText', 'G 12,500', CANVAS_W - PAD - 192, 24, 184, 28, {
           font: p.fontTitle,
-          textSize: 12,
+          textSize: 14,
         })
-        txt(root, els, p, 'Hint', 'HUD — place over gameplay', cx(260), PHONE_H - 80, 260, 20, {
-          textSize: 11,
+        txt(root, els, p, 'Hint', 'HUD — overlay on gameplay', cx(400), CANVAS_H - 56, 400, 24, {
+          textSize: 12,
           textColor3: p.muted,
         })
       }),
@@ -278,32 +302,33 @@ export const TEMPLATE_CATALOG = [
   {
     id: 'pixel-inventory',
     name: 'Pixel Inventory',
-    description: '16-slot pixel item grid',
+    description: '32-slot pixel item grid',
     category: 'pixel' as const,
     build: () =>
       build('Pixel Inventory', 'pixel', (root, els, p) => {
         bg(root, els, p)
-        const panel = screenPanel(root, els, p, 'Inventory', 48)
-        title(panel.id, els, p, 'ITEMS', PAD, PAD, 200)
-        slotGrid(panel.id, els, p, 4, 64, 8, PAD, 52, 16)
+        const panel = screenPanel(root, els, p, 'Inventory', 36)
+        title(panel.id, els, p, 'ITEMS', PAD, PAD, 300)
+        slotGrid(panel.id, els, p, 8, 80, 12, PAD, 64, 32)
       }),
   },
   {
     id: 'pixel-gameover',
     name: 'Game Over',
-    description: 'Game over screen with retry button',
+    description: 'Centered game over screen',
     category: 'pixel' as const,
     build: () =>
       build('Game Over', 'pixel', (root, els, p) => {
         bg(root, els, p)
-        title(root, els, p, 'GAME OVER', cx(280), 280, 280)
-        txt(root, els, p, 'Score', 'SCORE: 4,280', cx(200), 330, 200, 28, {
+        title(root, els, p, 'GAME OVER', cx(480), cy(240) - 50, 480)
+        txt(root, els, p, 'Score', 'SCORE: 42,800', cx(320), cy(240) + 10, 320, 32, {
           font: p.fontTitle,
-          textSize: 16,
+          textSize: 20,
           textColor3: p.accent,
         })
-        btn(root, els, p, 'Retry', 'RETRY', cx(220), 400, 220, 'primary')
-        btn(root, els, p, 'Menu', 'MENU', cx(220), 460, 220, 'secondary')
+        const btnW = 280
+        btn(root, els, p, 'Retry', 'RETRY', cx(btnW), cy(240) + 70, btnW, 'primary')
+        btn(root, els, p, 'Menu', 'MENU', cx(btnW), cy(240) + 140, btnW, 'secondary')
       }),
   },
 
@@ -311,62 +336,67 @@ export const TEMPLATE_CATALOG = [
   {
     id: 'lowpoly-menu',
     name: 'Low Poly Menu',
-    description: 'Soft flat menu with geometric style',
+    description: 'Soft flat desktop menu with geometric style',
     category: 'lowpoly' as const,
     build: () =>
       build('Low Poly Menu', 'lowpoly', (root, els, p) => {
         bg(root, els, p)
-        const card = box(root, els, p, 'MenuCard', cx(300), 220, 300, 360)
-        title(card.id, els, p, 'Adventure', PAD, 28, 268)
-        txt(card.id, els, p, 'Sub', 'Choose your path', PAD, 62, 268, 20, {
-          textSize: 12,
+        const cardW = 480
+        const cardH = 420
+        const card = box(root, els, p, 'MenuCard', cx(cardW), cy(cardH), cardW, cardH)
+        const inner = cardW - PAD * 2
+        title(card.id, els, p, 'Adventure', PAD, 36, inner)
+        txt(card.id, els, p, 'Sub', 'Choose your path', PAD, 82, inner, 24, {
+          textSize: 14,
           textColor3: p.muted,
         })
-        btn(card.id, els, p, 'Play', 'Play', PAD, 110, 268, 'primary')
-        btn(card.id, els, p, 'World', 'World Map', PAD, 168, 268, 'secondary')
-        btn(card.id, els, p, 'Settings', 'Settings', PAD, 226, 268, 'secondary')
+        btn(card.id, els, p, 'Play', 'Play', PAD, 130, inner, 'primary')
+        btn(card.id, els, p, 'World', 'World Map', PAD, 198, inner, 'secondary')
+        btn(card.id, els, p, 'Settings', 'Settings', PAD, 266, inner, 'secondary')
       }),
   },
   {
     id: 'lowpoly-stats',
     name: 'Character Stats',
-    description: 'RPG stat sheet panel',
+    description: 'Wide RPG stat sheet panel',
     category: 'lowpoly' as const,
     build: () =>
       build('Character Stats', 'lowpoly', (root, els, p) => {
         bg(root, els, p)
-        const panel = screenPanel(root, els, p, 'Stats', 72)
-        title(panel.id, els, p, 'CHARACTER', PAD, PAD, 250)
-        txt(panel.id, els, p, 'Level', 'Level 12 · Knight', PAD, 48, 250, 20, {
-          textSize: 12,
+        const panel = screenPanel(root, els, p, 'Stats', 48)
+        title(panel.id, els, p, 'CHARACTER', PAD, PAD, 400)
+        txt(panel.id, els, p, 'Level', 'Level 12 · Knight', PAD, 56, 400, 24, {
+          textSize: 14,
           textColor3: p.muted,
         })
         ;['Health', 'Strength', 'Defense', 'Speed', 'Luck'].forEach((stat, i) => {
-          const row = raised(panel.id, els, p, stat, PAD, 80 + i * 52, 358 - PAD * 2, 44)
-          txt(row.id, els, p, 'Val', `${stat}: ${50 + i * 10}`, 12, 0, 300, 44, { textSize: 14 })
+          const row = raised(panel.id, els, p, stat, PAD, 96 + i * 64, INNER, 52)
+          txt(row.id, els, p, 'Val', `${stat}: ${50 + i * 10}`, 20, 0, INNER - 40, 52, { textSize: 16 })
         })
       }),
   },
   {
     id: 'lowpoly-quests',
     name: 'Quest Log',
-    description: 'Active quest list with progress',
+    description: 'Three-column quest cards with progress',
     category: 'lowpoly' as const,
     build: () =>
       build('Quest Log', 'lowpoly', (root, els, p) => {
         bg(root, els, p)
-        const panel = screenPanel(root, els, p, 'Quests', 56)
-        title(panel.id, els, p, 'QUESTS', PAD, PAD, 200)
+        const panel = screenPanel(root, els, p, 'Quests', 40)
+        title(panel.id, els, p, 'QUESTS', PAD, PAD, 300)
         const quests = [
           ['Find the Crystal', '0 / 1'],
           ['Defeat 5 Wolves', '3 / 5'],
           ['Talk to Elder', 'Complete'],
         ]
+        const gap = 20
+        const cardW = Math.floor((INNER - gap * 2) / 3)
         quests.forEach(([q, prog], i) => {
-          const card = raised(panel.id, els, p, `Quest${i + 1}`, PAD, 52 + i * 88, 358 - PAD * 2, 76)
-          txt(card.id, els, p, 'Name', q, 12, 12, 300, 22, { font: p.fontTitle, textSize: 14 })
-          txt(card.id, els, p, 'Prog', prog, 12, 40, 300, 18, {
-            textSize: 12,
+          const card = raised(panel.id, els, p, `Quest${i + 1}`, PAD + i * (cardW + gap), 64, cardW, 200)
+          txt(card.id, els, p, 'Name', q, 16, 20, cardW - 32, 28, { font: p.fontTitle, textSize: 16 })
+          txt(card.id, els, p, 'Prog', prog, 16, 56, cardW - 32, 24, {
+            textSize: 14,
             textColor3: prog === 'Complete' ? p.accent2 : p.muted,
           })
         })
@@ -375,27 +405,29 @@ export const TEMPLATE_CATALOG = [
   {
     id: 'lowpoly-daily',
     name: 'Daily Rewards',
-    description: '7-day reward calendar',
+    description: '7-day reward calendar across the screen',
     category: 'lowpoly' as const,
     build: () =>
       build('Daily Rewards', 'lowpoly', (root, els, p) => {
         bg(root, els, p)
-        const panel = screenPanel(root, els, p, 'DailyRewards', 80)
-        title(panel.id, els, p, 'DAILY REWARDS', PAD, PAD, 280)
-        txt(panel.id, els, p, 'Streak', 'Day 3 streak', PAD, 48, 200, 20, {
-          textSize: 12,
+        const panel = screenPanel(root, els, p, 'DailyRewards', 48)
+        title(panel.id, els, p, 'DAILY REWARDS', PAD, PAD, 480)
+        txt(panel.id, els, p, 'Streak', 'Day 3 streak — keep it up!', PAD, 56, 400, 24, {
+          textSize: 14,
           textColor3: p.muted,
         })
+        const gap = 12
+        const dayW = Math.floor((INNER - gap * 6) / 7)
         for (let i = 0; i < 7; i++) {
-          const day = raised(panel.id, els, p, `Day${i + 1}`, PAD + i * 50, 80, 44, 64)
-          txt(day.id, els, p, 'Num', `${i + 1}`, 0, 6, 44, 16, {
-            textSize: 10,
+          const day = raised(panel.id, els, p, `Day${i + 1}`, PAD + i * (dayW + gap), 100, dayW, 120)
+          txt(day.id, els, p, 'Num', `Day ${i + 1}`, 0, 12, dayW, 20, {
+            textSize: 12,
             textColor3: p.muted,
             font: p.fontTitle,
           })
-          txt(day.id, els, p, 'Icon', i === 2 ? '✓' : '★', 0, 28, 44, 28, { textSize: 16 })
+          txt(day.id, els, p, 'Icon', i === 2 ? '✓' : '★', 0, 52, dayW, 48, { textSize: 24 })
         }
-        btn(panel.id, els, p, 'Claim', 'Claim Reward', PAD, 170, 358 - PAD * 2)
+        btn(panel.id, els, p, 'Claim', 'Claim Reward', PAD, 230, INNER)
       }),
   },
 ] as const

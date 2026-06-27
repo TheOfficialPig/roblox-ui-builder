@@ -277,7 +277,7 @@ export interface ExportManifestEntry {
 export const DEVICE_PRESETS: Record<DevicePreview, DevicePreset> = {
   phone: { id: 'phone', label: 'Phone', width: 390, height: 844 },
   tablet: { id: 'tablet', label: 'Tablet', width: 768, height: 1024 },
-  desktop: { id: 'desktop', label: 'Desktop', width: 1366, height: 768 },
+  desktop: { id: 'desktop', label: 'Desktop', width: 1920, height: 1080 },
 }
 
 export const ROBLOX_FONTS = [

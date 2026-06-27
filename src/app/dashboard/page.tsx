@@ -157,7 +157,7 @@ export default function DashboardPage() {
             <div className="mb-5">
               <h2 className="text-lg font-semibold text-white">UI Templates</h2>
               <p className="mt-1 text-sm text-studio-muted">
-                Full phone layouts — pick a style, then edit anything in the editor.
+                Full desktop layouts — pick a style, then edit anything in the editor.
               </p>
             </div>
             <div className="mb-5 flex flex-wrap gap-2">
