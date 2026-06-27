@@ -7,8 +7,9 @@ import type {
   RobloxClassName,
   UIElement,
 } from '../core/types'
+import { DEVICE_PRESETS } from '../core/types'
 import { createElement, createEmptyProject } from '../core/defaults'
-import { udim2Offset } from '../core/utils'
+import { getParentDimensions, isGuiObject, udim2Offset } from '../core/utils'
 
 const MAX_HISTORY = 50
 
@@ -116,6 +117,9 @@ export const useEditorStore = create<EditorState & EditorActions>()(
         state.history = [cloneProject(project)]
         state.historyIndex = 0
         state.isDirty = false
+        const device = DEVICE_PRESETS[project.devicePreview]
+        const zoom = Math.min(1.25, 720 / device.width)
+        state.viewport = { zoom, panX: 60, panY: 32 }
       }),
 
     newProject: (name) =>
@@ -161,6 +165,22 @@ export const useEditorStore = create<EditorState & EditorActions>()(
       const element = createElement(className)
       const { selectedIds, project } = get()
       const targetParentId = parentId ?? selectedIds[0] ?? project.rootIds[0] ?? null
+      const device = DEVICE_PRESETS[project.devicePreview]
+
+      if (isGuiObject(element) && element.className !== 'ScreenGui' && targetParentId) {
+        const { parentWidth, parentHeight } = getParentDimensions(
+          { ...element, parentId: targetParentId },
+          project.elements,
+          device.width,
+          device.height,
+        )
+        const w = element.size.xOffset || 160
+        const h = element.size.yOffset || 80
+        element.position = udim2Offset(
+          Math.max(0, Math.round((parentWidth - w) / 2)),
+          Math.max(0, Math.round((parentHeight - h) / 2)),
+        )
+      }
 
       set((state) => {
         state.project.elements[element.id] = element

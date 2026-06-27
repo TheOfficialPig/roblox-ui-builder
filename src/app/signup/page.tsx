@@ -39,10 +39,11 @@ export default function SignupPage() {
     })
 
     setLoading(false)
-    if (signInResult?.error) {
+    if (signInResult?.error || !signInResult?.ok) {
       router.push('/login')
     } else {
       router.push('/dashboard')
+      router.refresh()
     }
   }
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import {
   Plus,
   Star,
@@ -15,7 +15,7 @@ import {
   LayoutTemplate,
 } from 'lucide-react'
 import { createEmptyProject } from '@/lib/core/defaults'
-import { TEMPLATE_CATALOG } from '@/lib/templates'
+import { TEMPLATE_CATALOG, TEMPLATE_CATEGORIES, CATEGORY_LABELS, type TemplateCategory } from '@/lib/templates'
 import { TemplateCard } from '@/components/dashboard/TemplateCard'
 import type { ProjectDocument } from '@/lib/core/types'
 import {
@@ -33,7 +33,8 @@ export default function DashboardPage() {
   const { status } = useSession()
   const [projects, setProjects] = useState<ProjectListItem[]>([])
   const [search, setSearch] = useState('')
-  const [showTemplates, setShowTemplates] = useState(false)
+  const [showTemplates, setShowTemplates] = useState(true)
+  const [templateCategory, setTemplateCategory] = useState<TemplateCategory>('modern')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -116,7 +117,12 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() => setShowTemplates(!showTemplates)}
-            className="flex items-center gap-2 rounded-lg border border-studio-border px-3 py-1.5 text-sm text-studio-muted transition hover:bg-studio-hover hover:text-white"
+            className={cn(
+              'flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition',
+              showTemplates
+                ? 'border border-studio-accent/40 bg-studio-accent/10 text-white'
+                : 'border border-studio-border text-studio-muted hover:bg-studio-hover hover:text-white',
+            )}
           >
             <LayoutTemplate className="h-4 w-4" />
             Templates
@@ -128,6 +134,13 @@ export default function DashboardPage() {
           >
             <Plus className="h-4 w-4" />
             New Project
+          </button>
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className="rounded-lg border border-studio-border px-3 py-1.5 text-sm text-studio-muted transition hover:bg-studio-hover hover:text-white"
+          >
+            Sign out
           </button>
         </div>
       </header>
@@ -141,16 +154,31 @@ export default function DashboardPage() {
 
         {showTemplates && (
           <section className="mb-10">
-            <div className="mb-5 flex items-end justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-white">Starter templates</h2>
-                <p className="mt-1 text-sm text-studio-muted">
-                  Free layouts to jump in — customize everything in the editor.
-                </p>
-              </div>
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold text-white">UI Templates</h2>
+              <p className="mt-1 text-sm text-studio-muted">
+                Full phone layouts — pick a style, then edit anything in the editor.
+              </p>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {TEMPLATE_CATALOG.map((template) => (
+            <div className="mb-5 flex flex-wrap gap-2">
+              {TEMPLATE_CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setTemplateCategory(cat)}
+                  className={cn(
+                    'rounded-lg px-4 py-2 text-sm font-medium transition',
+                    templateCategory === cat
+                      ? 'bg-studio-accent text-white'
+                      : 'border border-studio-border text-studio-muted hover:border-studio-accent/40 hover:text-white',
+                  )}
+                >
+                  {CATEGORY_LABELS[cat]}
+                </button>
+              ))}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {TEMPLATE_CATALOG.filter((t) => t.category === templateCategory).map((template) => (
                 <TemplateCard
                   key={template.id}
                   templateId={template.id}

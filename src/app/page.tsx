@@ -5,14 +5,14 @@ import { ArrowRight, Code2, Layers, Play, Smartphone } from 'lucide-react'
 import { HomeHeroMockup } from '@/components/marketing/HomeHeroMockup'
 
 const TEMPLATES = [
-  'Main Menu',
-  'Inventory',
+  'Modern Menu',
+  'Retro Arcade',
+  'Pixel HUD',
+  'Low Poly Stats',
   'Shop',
-  'Daily Rewards',
+  'Inventory',
   'Leaderboard',
-  'Health HUD',
-  'Settings',
-  'Dialog Box',
+  'Daily Rewards',
 ]
 
 const BENTO = [
