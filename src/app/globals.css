@@ -1,17 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-studio-bg: #1e1e1e;
-  --color-studio-panel: #252526;
-  --color-studio-border: #3c3c3c;
-  --color-studio-accent: #0078d4;
-  --color-studio-accent-hover: #1a86d9;
-  --color-studio-text: #cccccc;
-  --color-studio-text-muted: #858585;
-  --color-studio-input: #3c3c3c;
-  --color-studio-hover: #2a2d2e;
-  --color-studio-selected: #094771;
-  --color-canvas-bg: #161616;
+  --color-studio-bg: #0c0c12;
+  --color-studio-panel: #13131c;
+  --color-studio-elevated: #1a1a26;
+  --color-studio-border: #2a2a3a;
+  --color-studio-accent: #7c5cfc;
+  --color-studio-accent-hover: #9070ff;
+  --color-studio-text: #e4e4ef;
+  --color-studio-muted: #7a7a94;
+  --color-studio-input: #1e1e2c;
+  --color-studio-hover: #222230;
+  --color-studio-selected: #2d2450;
+  --color-canvas-bg: #09090f;
 }
 
 * {
@@ -26,13 +27,13 @@ body {
   overflow: hidden;
   background: var(--color-studio-bg);
   color: var(--color-studio-text);
-  font-family: 'Segoe UI', Inter, system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
@@ -40,12 +41,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #555;
+  background: #3a3a50;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #666;
+  background: #4a4a62;
 }
 
 input,
@@ -57,18 +58,8 @@ button {
 
 .canvas-grid {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-}
-
-.selection-handle {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  background: white;
-  border: 1px solid var(--color-studio-accent);
-  border-radius: 1px;
-  z-index: 10000;
+    linear-gradient(to right, rgba(124, 92, 252, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(124, 92, 252, 0.06) 1px, transparent 1px);
 }
 
 .snap-guide-h {
@@ -76,7 +67,7 @@ button {
   left: 0;
   right: 0;
   height: 1px;
-  background: #ff6b6b;
+  background: #ff6b9d;
   pointer-events: none;
   z-index: 9999;
 }
@@ -86,7 +77,13 @@ button {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: #ff6b6b;
+  background: #ff6b9d;
   pointer-events: none;
   z-index: 9999;
+}
+
+/* Auth & marketing pages need scroll */
+.page-scroll {
+  overflow: auto;
+  height: 100%;
 }

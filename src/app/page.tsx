@@ -1,14 +1,19 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Layers, Sparkles, Download, Zap } from 'lucide-react'
+import { ArrowRight, Layers, Sparkles, Download, Zap, Box } from 'lucide-react'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen overflow-auto bg-[#0d0d0f]">
-      <nav className="flex items-center justify-between border-b border-white/10 px-8 py-4">
+    <div className="page-scroll min-h-screen bg-studio-bg">
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -left-32 top-0 h-96 w-96 rounded-full bg-studio-accent/10 blur-3xl" />
+        <div className="absolute -right-32 bottom-0 h-96 w-96 rounded-full bg-pink-500/5 blur-3xl" />
+      </div>
+
+      <nav className="relative flex items-center justify-between border-b border-studio-border px-8 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0078d4]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-studio-accent to-purple-400 shadow-lg shadow-studio-accent/30">
             <Layers className="h-5 w-5 text-white" />
           </div>
           <span className="text-lg font-semibold text-white">Roblox UI Builder</span>
@@ -16,55 +21,57 @@ export default function HomePage() {
         <div className="flex items-center gap-3">
           <Link
             href="/login"
-            className="rounded-md px-4 py-2 text-sm text-gray-300 transition hover:text-white"
+            className="rounded-lg px-4 py-2 text-sm text-studio-muted transition hover:text-white"
           >
             Log in
           </Link>
           <Link
             href="/signup"
-            className="rounded-md bg-[#0078d4] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#1a86d9]"
+            className="rounded-lg bg-studio-accent px-4 py-2 text-sm font-medium text-white shadow-lg shadow-studio-accent/25 transition hover:bg-studio-accent-hover"
           >
             Sign up
           </Link>
         </div>
       </nav>
 
-      <main className="mx-auto max-w-6xl px-8 py-20">
+      <main className="relative mx-auto max-w-6xl px-8 py-20">
         <div className="text-center">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#0078d4]/30 bg-[#0078d4]/10 px-4 py-1.5 text-sm text-[#5eb3ff]">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-studio-accent/30 bg-studio-accent/10 px-4 py-1.5 text-sm text-purple-300">
             <Sparkles className="h-4 w-4" />
             Design Roblox UIs without Studio
           </div>
-          <h1 className="mb-6 text-5xl font-bold tracking-tight text-white">
+          <h1 className="mb-6 text-5xl font-bold tracking-tight text-white md:text-6xl">
             Build Roblox interfaces
             <br />
-            <span className="text-[#0078d4]">visually</span>
+            <span className="bg-gradient-to-r from-studio-accent to-purple-300 bg-clip-text text-transparent">
+              visually
+            </span>
           </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-400">
+          <p className="mx-auto mb-10 max-w-2xl text-lg text-studio-muted">
             A professional Figma-like editor for Roblox GUI. Drag, resize, and customize
             ScreenGuis, Frames, TextButtons, and more — then export to Lua, PNG layers, or JSON.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-2 rounded-lg bg-[#0078d4] px-6 py-3 font-medium text-white transition hover:bg-[#1a86d9]"
+              className="inline-flex items-center gap-2 rounded-xl bg-studio-accent px-6 py-3 font-medium text-white shadow-xl shadow-studio-accent/25 transition hover:bg-studio-accent-hover"
             >
               Open Dashboard
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/editor/new"
-              className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-6 py-3 font-medium text-white transition hover:bg-white/5"
+              className="inline-flex items-center gap-2 rounded-xl border border-studio-border bg-studio-panel px-6 py-3 font-medium text-white transition hover:border-studio-accent/50 hover:bg-studio-elevated"
             >
               Start from scratch
             </Link>
           </div>
         </div>
 
-        <div className="mt-24 grid gap-6 md:grid-cols-3">
+        <div className="mt-24 grid gap-5 md:grid-cols-3">
           {[
             {
-              icon: Layers,
+              icon: Box,
               title: 'Visual Editor',
               desc: 'Infinite canvas, smart snapping, alignment guides, multi-select, undo/redo, and device previews.',
             },
@@ -81,11 +88,13 @@ export default function HomePage() {
           ].map(({ icon: Icon, title, desc }) => (
             <div
               key={title}
-              className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur"
+              className="rounded-2xl border border-studio-border bg-studio-panel/80 p-6 backdrop-blur transition hover:border-studio-accent/40 hover:shadow-lg hover:shadow-studio-accent/5"
             >
-              <Icon className="mb-4 h-8 w-8 text-[#0078d4]" />
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-studio-accent/15">
+                <Icon className="h-5 w-5 text-studio-accent" />
+              </div>
               <h3 className="mb-2 text-lg font-semibold text-white">{title}</h3>
-              <p className="text-sm text-gray-400">{desc}</p>
+              <p className="text-sm leading-relaxed text-studio-muted">{desc}</p>
             </div>
           ))}
         </div>

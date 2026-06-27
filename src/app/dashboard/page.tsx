@@ -94,18 +94,20 @@ export default function DashboardPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#1e1e1e] text-gray-400">
+      <div className="flex min-h-screen items-center justify-center bg-studio-bg text-studio-muted">
         Loading projects...
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen overflow-auto bg-[#1e1e1e]">
-      <header className="flex items-center justify-between border-b border-[#3c3c3c] px-6 py-4">
+    <div className="page-scroll min-h-screen bg-studio-bg">
+      <header className="flex items-center justify-between border-b border-studio-border px-6 py-4">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2 text-white">
-            <Layers className="h-5 w-5 text-[#0078d4]" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-studio-accent">
+              <Layers className="h-4 w-4 text-white" />
+            </div>
             <span className="font-semibold">Roblox UI Builder</span>
           </Link>
         </div>
@@ -113,7 +115,7 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() => setShowTemplates(!showTemplates)}
-            className="flex items-center gap-2 rounded-md border border-[#3c3c3c] px-3 py-1.5 text-sm text-gray-300 hover:bg-[#2a2d2e]"
+            className="flex items-center gap-2 rounded-lg border border-studio-border px-3 py-1.5 text-sm text-studio-muted transition hover:bg-studio-hover hover:text-white"
           >
             <LayoutTemplate className="h-4 w-4" />
             Templates
@@ -121,7 +123,7 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() => createProject()}
-            className="flex items-center gap-2 rounded-md bg-[#0078d4] px-3 py-1.5 text-sm font-medium text-white hover:bg-[#1a86d9]"
+            className="flex items-center gap-2 rounded-lg bg-studio-accent px-3 py-1.5 text-sm font-medium text-white shadow-lg shadow-studio-accent/20 transition hover:bg-studio-accent-hover"
           >
             <Plus className="h-4 w-4" />
             New Project
@@ -145,13 +147,13 @@ export default function DashboardPage() {
                   key={template.id}
                   type="button"
                   onClick={() => createProject(template.build())}
-                  className="rounded-lg border border-[#3c3c3c] bg-[#252526] p-4 text-left transition hover:border-[#0078d4] hover:bg-[#2a2d2e]"
+                  className="rounded-xl border border-studio-border bg-studio-panel p-4 text-left transition hover:border-studio-accent/50 hover:bg-studio-elevated"
                 >
-                  <div className="mb-2 text-xs font-medium uppercase tracking-wide text-[#0078d4]">
+                  <div className="mb-2 text-xs font-medium uppercase tracking-wide text-studio-accent">
                     {template.category}
                   </div>
                   <div className="mb-1 font-medium text-white">{template.name}</div>
-                  <div className="text-sm text-gray-400">{template.description}</div>
+                  <div className="text-sm text-studio-muted">{template.description}</div>
                 </button>
               ))}
             </div>
@@ -166,19 +168,19 @@ export default function DashboardPage() {
               placeholder="Search projects..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-md border border-[#3c3c3c] bg-[#252526] py-2 pl-10 pr-4 text-sm text-white placeholder:text-gray-500 focus:border-[#0078d4] focus:outline-none"
+              className="w-full rounded-lg border border-studio-border bg-studio-panel py-2 pl-10 pr-4 text-sm text-white placeholder:text-studio-muted focus:border-studio-accent focus:outline-none"
             />
           </div>
         </div>
 
         {filtered.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-[#3c3c3c] py-16 text-center">
-            <FolderOpen className="mx-auto mb-4 h-12 w-12 text-gray-600" />
-            <p className="mb-4 text-gray-400">No projects yet</p>
+          <div className="rounded-xl border border-dashed border-studio-border py-16 text-center">
+            <FolderOpen className="mx-auto mb-4 h-12 w-12 text-studio-muted" />
+            <p className="mb-4 text-studio-muted">No projects yet</p>
             <button
               type="button"
               onClick={() => createProject()}
-              className="rounded-md bg-[#0078d4] px-4 py-2 text-sm font-medium text-white hover:bg-[#1a86d9]"
+              className="rounded-lg bg-studio-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-studio-accent-hover"
             >
               Create your first project
             </button>
@@ -188,22 +190,22 @@ export default function DashboardPage() {
             {filtered.map((project) => (
               <div
                 key={project.id}
-                className="group rounded-lg border border-[#3c3c3c] bg-[#252526] transition hover:border-[#0078d4]/50"
+                className="group rounded-xl border border-studio-border bg-studio-panel transition hover:border-studio-accent/40"
               >
                 <Link href={`/editor/${project.id}`} className="block p-4">
-                  <div className="mb-3 flex h-32 items-center justify-center rounded-md bg-[#1e1e1e]">
-                    <Layers className="h-10 w-10 text-gray-600" />
+                  <div className="mb-3 flex h-32 items-center justify-center rounded-lg bg-studio-bg">
+                    <Layers className="h-10 w-10 text-studio-muted" />
                   </div>
                   <div className="font-medium text-white">{project.name}</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-studio-muted">
                     {new Date(project.updatedAt).toLocaleDateString()}
                   </div>
                 </Link>
-                <div className="flex items-center gap-1 border-t border-[#3c3c3c] px-2 py-1">
+                <div className="flex items-center gap-1 border-t border-studio-border px-2 py-1">
                   <button
                     type="button"
                     onClick={() => toggleStar(project.id, project.starred)}
-                    className="rounded p-1.5 text-gray-400 hover:bg-[#2a2d2e] hover:text-yellow-400"
+                    className="rounded p-1.5 text-studio-muted hover:bg-studio-hover hover:text-yellow-400"
                   >
                     <Star
                       className={cn('h-4 w-4', project.starred && 'fill-yellow-400 text-yellow-400')}
@@ -212,14 +214,14 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => duplicateProject(project.id)}
-                    className="rounded p-1.5 text-gray-400 hover:bg-[#2a2d2e] hover:text-white"
+                    className="rounded p-1.5 text-studio-muted hover:bg-studio-hover hover:text-white"
                   >
                     <Copy className="h-4 w-4" />
                   </button>
                   <button
                     type="button"
                     onClick={() => deleteProject(project.id)}
-                    className="ml-auto rounded p-1.5 text-gray-400 hover:bg-[#2a2d2e] hover:text-red-400"
+                    className="ml-auto rounded p-1.5 text-studio-muted hover:bg-studio-hover hover:text-red-400"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>

@@ -63,14 +63,14 @@ function TreeNode({ element, depth = 0 }: { element: UIElement; depth?: number }
     <div>
       <div
         className={cn(
-          'group flex items-center gap-1 rounded px-1 py-0.5 text-xs hover:bg-[#2a2d2e]',
-          isSelected && 'bg-[#094771]',
+          'group flex items-center gap-1 rounded-md px-1 py-0.5 text-xs transition hover:bg-studio-hover',
+          isSelected && 'bg-studio-selected',
         )}
         style={{ paddingLeft: depth * 12 + 4 }}
       >
         <button
           type="button"
-          className="flex h-4 w-4 shrink-0 items-center justify-center text-gray-500"
+          className="flex h-4 w-4 shrink-0 items-center justify-center text-studio-muted"
           onClick={() => toggleCollapse(element.id)}
         >
           {hasChildren ? (
@@ -84,7 +84,7 @@ function TreeNode({ element, depth = 0 }: { element: UIElement; depth?: number }
           )}
         </button>
 
-        <span className="w-4 shrink-0 text-center text-[10px] text-gray-400">
+        <span className="w-4 shrink-0 text-center text-[10px] text-studio-muted">
           {CLASS_ICONS[element.className] ?? '•'}
         </span>
 
@@ -98,12 +98,12 @@ function TreeNode({ element, depth = 0 }: { element: UIElement; depth?: number }
               if (e.key === 'Enter') commitRename()
               if (e.key === 'Escape') setIsEditing(false)
             }}
-            className="min-w-0 flex-1 rounded border border-[#0078d4] bg-[#3c3c3c] px-1 text-xs text-white focus:outline-none"
+            className="min-w-0 flex-1 rounded border border-studio-accent bg-studio-input px-1 text-xs text-white focus:outline-none"
           />
         ) : (
           <button
             type="button"
-            className="min-w-0 flex-1 truncate text-left text-gray-200"
+            className="min-w-0 flex-1 truncate text-left text-studio-text"
             onClick={(e) => select([element.id], e.shiftKey)}
             onDoubleClick={() => {
               setEditName(element.name)
@@ -118,7 +118,7 @@ function TreeNode({ element, depth = 0 }: { element: UIElement; depth?: number }
           <button
             type="button"
             onClick={() => toggleVisibility(element.id)}
-            className="rounded p-0.5 text-gray-500 hover:text-white"
+            className="rounded p-0.5 text-studio-muted hover:text-white"
           >
             {element.visible ? (
               <Eye className="h-3 w-3" />
@@ -129,7 +129,7 @@ function TreeNode({ element, depth = 0 }: { element: UIElement; depth?: number }
           <button
             type="button"
             onClick={() => toggleLock(element.id)}
-            className="rounded p-0.5 text-gray-500 hover:text-white"
+            className="rounded p-0.5 text-studio-muted hover:text-white"
           >
             {element.locked ? (
               <Lock className="h-3 w-3" />
@@ -158,25 +158,25 @@ export function ExplorerPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-[#3c3c3c] px-3 py-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+      <div className="flex items-center justify-between border-b border-studio-border px-3 py-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-studio-muted">
           Explorer
         </span>
         <div className="relative">
           <button
             type="button"
             onClick={() => setShowAddMenu(!showAddMenu)}
-            className="rounded p-1 text-gray-400 hover:bg-[#2a2d2e] hover:text-white"
+            className="rounded p-1 text-studio-muted hover:bg-studio-hover hover:text-white"
           >
             <Plus className="h-4 w-4" />
           </button>
           {showAddMenu && (
-            <div className="absolute right-0 top-full z-50 mt-1 max-h-64 w-48 overflow-y-auto rounded-md border border-[#3c3c3c] bg-[#252526] py-1 shadow-xl">
+            <div className="absolute right-0 top-full z-50 mt-1 max-h-64 w-48 overflow-y-auto rounded-md border border-studio-border bg-studio-panel py-1 shadow-xl">
               {CREATABLE_OBJECTS.map((obj) => (
                 <button
                   key={obj.className}
                   type="button"
-                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-gray-300 hover:bg-[#094771]"
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs text-studio-muted hover:bg-studio-selected"
                   onClick={() => {
                     addElement(obj.className)
                     setShowAddMenu(false)
@@ -213,8 +213,8 @@ export function LayersPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-[#3c3c3c] px-3 py-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+      <div className="border-b border-studio-border px-3 py-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-studio-muted">
           Layers
         </span>
       </div>
@@ -227,13 +227,13 @@ export function LayersPanel() {
               type="button"
               onClick={(e) => select([el.id], e.shiftKey)}
               className={cn(
-                'flex w-full items-center gap-2 rounded px-2 py-1 text-xs hover:bg-[#2a2d2e]',
-                selectedIds.includes(el.id) && 'bg-[#094771]',
+                'flex w-full items-center gap-2 rounded px-2 py-1 text-xs hover:bg-studio-hover',
+                selectedIds.includes(el.id) && 'bg-studio-selected',
               )}
             >
-              <span className="text-gray-500">{el.zIndex}</span>
-              <span className="truncate text-gray-200">{el.name}</span>
-              <span className="ml-auto text-[10px] text-gray-500">{el.className}</span>
+              <span className="text-studio-muted">{el.zIndex}</span>
+              <span className="truncate text-studio-text">{el.name}</span>
+              <span className="ml-auto text-[10px] text-studio-muted">{el.className}</span>
             </button>
           ))}
       </div>
@@ -244,14 +244,14 @@ export function LayersPanel() {
 export function AssetsPanel() {
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-[#3c3c3c] px-3 py-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+      <div className="border-b border-studio-border px-3 py-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-studio-muted">
           Assets
         </span>
       </div>
       <div className="flex flex-1 flex-col items-center justify-center p-4 text-center">
-        <Folder className="mb-2 h-8 w-8 text-gray-600" />
-        <p className="text-xs text-gray-500">
+        <Folder className="mb-2 h-8 w-8 text-studio-muted" />
+        <p className="text-xs text-studio-muted">
           Asset library coming soon.
           <br />
           Upload images for ImageLabels and ImageButtons.

@@ -20,27 +20,25 @@ export function BottomBar() {
         : 'None'
 
   return (
-    <footer className="flex h-7 shrink-0 items-center gap-4 border-t border-[#3c3c3c] bg-[#007acc] px-3 text-xs text-white">
-      <span>
-        Zoom: {Math.round(viewport.zoom * 100)}%
-      </span>
+    <footer className="flex h-7 shrink-0 items-center gap-4 border-t border-studio-border bg-studio-elevated px-4 text-[11px] text-studio-muted">
+      <span>Zoom {Math.round(viewport.zoom * 100)}%</span>
       <button
         type="button"
         onClick={() => setViewport({ zoom: 1, panX: 100, panY: 50 })}
-        className="hover:underline"
+        className="text-studio-accent transition hover:text-studio-accent-hover"
       >
         Reset
       </button>
-      <span className="text-white/60">|</span>
+      <span className="text-studio-border">|</span>
       <span>
-        Canvas: {device.width} × {device.height} ({device.label})
+        {device.width} × {device.height} · {device.label}
       </span>
-      <span className="text-white/60">|</span>
+      <span className="text-studio-border">|</span>
       <span>
-        X: {mousePosition.x}, Y: {mousePosition.y}
+        X {mousePosition.x}, Y {mousePosition.y}
       </span>
-      <span className="text-white/60">|</span>
-      <span className="truncate">Selection: {selectedName}</span>
+      <span className="text-studio-border">|</span>
+      <span className="truncate text-studio-text">{selectedName}</span>
     </footer>
   )
 }

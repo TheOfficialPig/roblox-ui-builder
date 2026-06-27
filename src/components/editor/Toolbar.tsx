@@ -17,12 +17,10 @@ import {
   Tablet,
   Monitor,
   Group,
-  FileCode,
-  Image,
-  FileJson,
+  Layers,
 } from 'lucide-react'
 import { DEVICE_PRESETS } from '@/lib/core/types'
-import type { DevicePreview, ExportFormat } from '@/lib/core/types'
+import type { DevicePreview } from '@/lib/core/types'
 import { useCanRedo, useCanUndo, useEditorStore } from '@/lib/store/editor-store'
 import { saveProjectApi } from '@/lib/api/projects-client'
 import { cn } from '@/lib/utils/cn'
@@ -71,24 +69,27 @@ export function Toolbar() {
 
   return (
     <>
-      <header className="flex h-11 shrink-0 items-center gap-1 border-b border-[#3c3c3c] bg-[#252526] px-2">
+      <header className="flex h-12 shrink-0 items-center gap-1 border-b border-studio-border bg-studio-panel px-3">
         <Link
           href="/dashboard"
-          className="mr-2 rounded px-2 py-1 text-xs text-gray-400 hover:bg-[#2a2d2e] hover:text-white"
+          className="mr-1 flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-studio-muted transition hover:bg-studio-hover hover:text-white"
         >
-          ← Dashboard
+          <Layers className="h-3.5 w-3.5 text-studio-accent" />
+          Dashboard
         </Link>
+
+        <div className="mx-1 h-5 w-px bg-studio-border" />
 
         <input
           type="text"
           value={project.name}
           onChange={(e) => setProjectName(e.target.value)}
-          className="w-40 rounded border border-transparent bg-transparent px-2 py-0.5 text-sm font-medium text-white hover:border-[#3c3c3c] focus:border-[#0078d4] focus:outline-none"
+          className="w-44 rounded-lg border border-transparent bg-transparent px-2 py-1 text-sm font-medium text-white transition hover:border-studio-border focus:border-studio-accent focus:outline-none"
         />
 
-        {isDirty && <span className="text-xs text-gray-500">•</span>}
+        {isDirty && <span className="h-1.5 w-1.5 rounded-full bg-studio-accent" title="Unsaved changes" />}
 
-        <div className="mx-2 h-5 w-px bg-[#3c3c3c]" />
+        <div className="mx-2 h-5 w-px bg-studio-border" />
 
         <ToolButton onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">
           <Undo2 className="h-4 w-4" />
@@ -97,7 +98,7 @@ export function Toolbar() {
           <Redo2 className="h-4 w-4" />
         </ToolButton>
 
-        <div className="mx-2 h-5 w-px bg-[#3c3c3c]" />
+        <div className="mx-2 h-5 w-px bg-studio-border" />
 
         <ToolButton onClick={copySelected} title="Copy (Ctrl+C)">
           <Copy className="h-4 w-4" />
@@ -115,7 +116,7 @@ export function Toolbar() {
           <Group className="h-4 w-4" />
         </ToolButton>
 
-        <div className="mx-2 h-5 w-px bg-[#3c3c3c]" />
+        <div className="mx-2 h-5 w-px bg-studio-border" />
 
         <ToolButton
           onClick={() => setGridEnabled(!gridEnabled)}
@@ -132,7 +133,7 @@ export function Toolbar() {
           <Magnet className="h-4 w-4" />
         </ToolButton>
 
-        <div className="mx-2 h-5 w-px bg-[#3c3c3c]" />
+        <div className="mx-2 h-5 w-px bg-studio-border" />
 
         {deviceButtons.map(({ id, icon: Icon }) => (
           <ToolButton
@@ -154,7 +155,7 @@ export function Toolbar() {
         <button
           type="button"
           onClick={() => setShowExport(true)}
-          className="ml-1 flex items-center gap-1.5 rounded bg-[#0078d4] px-3 py-1 text-xs font-medium text-white hover:bg-[#1a86d9]"
+          className="ml-1.5 flex items-center gap-1.5 rounded-lg bg-studio-accent px-3.5 py-1.5 text-xs font-medium text-white shadow-lg shadow-studio-accent/20 transition hover:bg-studio-accent-hover"
         >
           <Download className="h-4 w-4" />
           Export
@@ -186,8 +187,8 @@ function ToolButton({
       disabled={disabled}
       title={title}
       className={cn(
-        'flex items-center gap-1 rounded px-2 py-1 text-gray-300 transition',
-        active ? 'bg-[#094771] text-white' : 'hover:bg-[#2a2d2e] hover:text-white',
+        'flex items-center gap-1 rounded-lg px-2 py-1.5 text-studio-muted transition',
+        active ? 'bg-studio-selected text-white' : 'hover:bg-studio-hover hover:text-white',
         disabled && 'cursor-not-allowed opacity-40',
       )}
     >

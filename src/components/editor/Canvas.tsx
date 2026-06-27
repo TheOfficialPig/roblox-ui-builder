@@ -60,11 +60,9 @@ export function CanvasElement({
   parentX,
   parentY,
 }: CanvasElementProps) {
-  const selectedIds = useEditorStore((s) => s.selectedIds)
   const select = useEditorStore((s) => s.select)
   const elements = useEditorStore((s) => s.project.elements)
 
-  const isSelected = selectedIds.includes(element.id)
   const isFolder = element.className === 'Folder' || element.isLayerGroup
 
   if (!element.visible || isFolder) {
@@ -167,7 +165,7 @@ export function CanvasElement({
       <div
         data-element-id={element.id}
         data-exportable="true"
-        className={cn('canvas-element', isSelected && 'ring-2 ring-[#0078d4] ring-offset-0')}
+        className="canvas-element"
         style={style}
         onMouseDown={handleMouseDown}
       >
@@ -239,21 +237,28 @@ function SelectionOverlay({
   const elements = useEditorStore((s) => s.project.elements)
   const bounds = getElementBounds(element, elements, deviceWidth, deviceHeight)
 
+  const rotation = element.rotation || 0
+  const cx = bounds.width / 2
+  const cy = bounds.height / 2
+
   return (
     <div
-      className="pointer-events-none absolute border border-[#0078d4]"
+      className="pointer-events-none absolute"
       style={{
         left: bounds.x,
         top: bounds.y,
         width: bounds.width,
         height: bounds.height,
         zIndex: 9998,
+        transform: rotation ? `rotate(${rotation}deg)` : undefined,
+        transformOrigin: `${cx}px ${cy}px`,
       }}
     >
+      <div className="absolute inset-0 border border-studio-accent shadow-[0_0_0_1px_rgba(124,92,252,0.15)]" />
       {HANDLE_CONFIG.map(({ id, cursor, style }) => (
         <div
           key={id}
-          className="resize-handle pointer-events-auto absolute bg-white border border-[#0078d4]"
+          className="resize-handle pointer-events-auto absolute rounded-sm border border-studio-accent bg-white shadow-sm"
           style={{
             width: HANDLE_SIZE,
             height: HANDLE_SIZE,
@@ -275,7 +280,7 @@ interface DragState {
   ids: string[]
   startX: number
   startY: number
-  origins: Record<string, { x: number; y: number }>
+  origins: Record<string, { x: number; y: number; width: number; height: number }>
 }
 
 interface ResizeState {
@@ -408,10 +413,12 @@ export function DesignCanvas() {
       const target = e.target as HTMLElement
       if (target.closest('.resize-handle')) return
 
-      const origins: Record<string, { x: number; y: number }> = {}
+      const origins: Record<string, { x: number; y: number; width: number; height: number }> = {}
       for (const id of selectedIds) {
         const el = project.elements[id]
-        if (el) origins[id] = { x: el.position.xOffset, y: el.position.yOffset }
+        if (!el) continue
+        const rect = getElementRectInParent(el, project.elements, device.width, device.height)
+        origins[id] = { x: rect.x, y: rect.y, width: rect.width, height: rect.height }
       }
       setDragState({ ids: selectedIds, startX: e.clientX, startY: e.clientY, origins })
     },
@@ -480,13 +487,13 @@ export function DesignCanvas() {
         for (const id of dragState.ids) {
           const el = project.elements[id]
           if (!el || el.locked) continue
-          updateElement(id, {
-            position: {
-              ...el.position,
-              xOffset: dragState.origins[id].x + snapDx,
-              yOffset: dragState.origins[id].y + snapDy,
-            },
-          })
+          const origin = dragState.origins[id]
+          const newX = origin.x + snapDx
+          const newY = origin.y + snapDy
+          updateElement(
+            id,
+            rectToRobloxProps(newX, newY, origin.width, origin.height, el.anchorPoint),
+          )
         }
       }
     }
@@ -541,7 +548,7 @@ export function DesignCanvas() {
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full overflow-hidden bg-[#161616]"
+      className="relative h-full w-full overflow-hidden bg-canvas-bg"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -559,7 +566,7 @@ export function DesignCanvas() {
         <div
           data-canvas-bg="true"
           className={cn(
-            'relative rounded-lg border border-[#3c3c3c] bg-[#0a0a0a] shadow-2xl',
+            'relative rounded-xl border border-studio-border bg-[#08080c] shadow-2xl shadow-black/40',
             gridEnabled && 'canvas-grid',
           )}
           style={{

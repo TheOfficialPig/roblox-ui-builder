@@ -47,42 +47,44 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#1e1e1e]">
-      <div className="w-full max-w-sm rounded-lg border border-[#3c3c3c] bg-[#252526] p-8">
+    <div className="page-scroll flex min-h-screen items-center justify-center bg-studio-bg">
+      <div className="w-full max-w-sm rounded-2xl border border-studio-border bg-studio-panel p-8 shadow-2xl shadow-black/40">
         <div className="mb-6 flex items-center justify-center gap-2">
-          <Layers className="h-6 w-6 text-[#0078d4]" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-studio-accent">
+            <Layers className="h-4 w-4 text-white" />
+          </div>
           <span className="text-lg font-semibold text-white">Roblox UI Builder</span>
         </div>
         <h1 className="mb-6 text-center text-xl font-semibold text-white">Create account</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Name</label>
+            <label className="mb-1 block text-xs text-studio-muted">Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded border border-[#3c3c3c] bg-[#3c3c3c] px-3 py-2 text-sm text-white focus:border-[#0078d4] focus:outline-none"
+              className="w-full rounded-lg border border-studio-border bg-studio-input px-3 py-2 text-sm text-white focus:border-studio-accent focus:outline-none focus:ring-1 focus:ring-studio-accent/30"
               required
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Email</label>
+            <label className="mb-1 block text-xs text-studio-muted">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded border border-[#3c3c3c] bg-[#3c3c3c] px-3 py-2 text-sm text-white focus:border-[#0078d4] focus:outline-none"
+              className="w-full rounded-lg border border-studio-border bg-studio-input px-3 py-2 text-sm text-white focus:border-studio-accent focus:outline-none focus:ring-1 focus:ring-studio-accent/30"
               required
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Password</label>
+            <label className="mb-1 block text-xs text-studio-muted">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               minLength={8}
-              className="w-full rounded border border-[#3c3c3c] bg-[#3c3c3c] px-3 py-2 text-sm text-white focus:border-[#0078d4] focus:outline-none"
+              className="w-full rounded-lg border border-studio-border bg-studio-input px-3 py-2 text-sm text-white focus:border-studio-accent focus:outline-none focus:ring-1 focus:ring-studio-accent/30"
               required
             />
           </div>
@@ -90,14 +92,14 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded bg-[#0078d4] py-2 text-sm font-medium text-white hover:bg-[#1a86d9] disabled:opacity-50"
+            className="w-full rounded-lg bg-studio-accent py-2.5 text-sm font-medium text-white shadow-lg shadow-studio-accent/20 transition hover:bg-studio-accent-hover disabled:opacity-50"
           >
             {loading ? 'Creating account...' : 'Sign up'}
           </button>
         </form>
-        <p className="mt-4 text-center text-sm text-gray-400">
+        <p className="mt-4 text-center text-sm text-studio-muted">
           Already have an account?{' '}
-          <Link href="/login" className="text-[#0078d4] hover:underline">
+          <Link href="/login" className="text-studio-accent hover:underline">
             Log in
           </Link>
         </p>

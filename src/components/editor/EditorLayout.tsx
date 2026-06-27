@@ -20,18 +20,18 @@ function LeftSidebar() {
   ]
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-[#3c3c3c] bg-[#252526]">
-      <div className="flex border-b border-[#3c3c3c]">
+    <aside className="flex w-64 shrink-0 flex-col border-r border-studio-border bg-studio-panel">
+      <div className="flex border-b border-studio-border">
         {tabs.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
             className={cn(
-              'flex-1 px-2 py-2 text-xs font-medium transition',
+              'flex-1 px-2 py-2.5 text-[11px] font-medium transition',
               tab === t.id
-                ? 'border-b-2 border-[#0078d4] text-white'
-                : 'text-gray-400 hover:text-gray-200',
+                ? 'border-b-2 border-studio-accent text-white'
+                : 'text-studio-muted hover:text-studio-text',
             )}
           >
             {t.label}
@@ -89,14 +89,14 @@ export function EditorLayout() {
   useKeyboardShortcuts()
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-[#1e1e1e]">
+    <div className="flex h-screen flex-col overflow-hidden bg-studio-bg">
       <Toolbar />
       <div className="flex flex-1 overflow-hidden">
         <LeftSidebar />
         <main className="flex-1 overflow-hidden">
           <DesignCanvas />
         </main>
-        <aside className="w-72 shrink-0 overflow-hidden border-l border-[#3c3c3c] bg-[#252526]">
+        <aside className="w-72 shrink-0 overflow-hidden border-l border-studio-border bg-studio-panel">
           <PropertiesPanel />
         </aside>
       </div>
