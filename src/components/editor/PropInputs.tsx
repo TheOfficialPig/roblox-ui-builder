@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import type { UIElement } from '@/lib/core/types'
 import { colorToHex, hexToColor3 } from '@/lib/core/utils'
 import { cn } from '@/lib/utils/cn'
@@ -22,8 +23,14 @@ export function PropSection({
   defaultOpen?: boolean
   children: React.ReactNode
 }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+
   return (
-    <details open={defaultOpen} className="group border-b border-studio-border/60">
+    <details
+      open={isOpen}
+      onToggle={(e) => setIsOpen(e.currentTarget.open)}
+      className="group border-b border-studio-border/60"
+    >
       <summary className="flex cursor-pointer list-none items-center gap-2 bg-studio-elevated/80 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-studio-muted transition hover:text-white [&::-webkit-details-marker]:hidden">
         <span className="text-[10px] text-studio-accent transition group-open:rotate-90">▶</span>
         {title}

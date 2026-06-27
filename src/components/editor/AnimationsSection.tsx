@@ -1,13 +1,16 @@
 'use client'
 
+import { useMemo } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import type { UIElement } from '@/lib/core/types'
 import { useEditorStore } from '@/lib/store/editor-store'
 import { CheckboxInput, NumberInput, PropRow, PropSection, SelectInput } from './PropInputs'
 
 export function AnimationsSection({ element }: { element: UIElement }) {
-  const animations = useEditorStore((s) =>
-    s.project.animations.filter((a) => a.elementId === element.id),
+  const projectAnimations = useEditorStore((s) => s.project.animations)
+  const animations = useMemo(
+    () => projectAnimations.filter((a) => a.elementId === element.id),
+    [projectAnimations, element.id],
   )
   const addAnimation = useEditorStore((s) => s.addAnimation)
   const updateAnimation = useEditorStore((s) => s.updateAnimation)

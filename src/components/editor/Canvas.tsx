@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { TextXAlignment, TextYAlignment, UIElement } from '@/lib/core/types'
 import { DEVICE_PRESETS } from '@/lib/core/types'
 import {
@@ -93,7 +93,7 @@ function renderChildElements(
     if (child.className === 'Folder' || child.isLayerGroup) {
       return (
         <span key={childId} style={{ display: 'contents' }}>
-          {renderChildElements(parent, child.children, elements, parentWidth, parentHeight, parentX, parentY)}
+          {renderChildElements(child, child.children, elements, parentWidth, parentHeight, parentX, parentY)}
         </span>
       )
     }
@@ -101,7 +101,7 @@ function renderChildElements(
     if (isLayoutObject(child.className)) {
       return (
         <span key={childId} style={{ display: 'contents' }}>
-          {renderChildElements(parent, child.children, elements, parentWidth, parentHeight, parentX, parentY)}
+          {renderChildElements(child, child.children, elements, parentWidth, parentHeight, parentX, parentY)}
         </span>
       )
     }
@@ -130,8 +130,13 @@ export function CanvasElement({
 }: CanvasElementProps) {
   const select = useEditorStore((s) => s.select)
   const elements = useEditorStore((s) => s.project.elements)
-  const animations = useEditorStore((s) =>
-    s.project.animations.filter((a) => a.elementId === element.id && a.enabled && a.autoPlay),
+  const projectAnimations = useEditorStore((s) => s.project.animations)
+  const animations = useMemo(
+    () =>
+      projectAnimations.filter(
+        (a) => a.elementId === element.id && a.enabled && a.autoPlay,
+      ),
+    [projectAnimations, element.id],
   )
 
   const isFolder = element.className === 'Folder' || element.isLayerGroup
