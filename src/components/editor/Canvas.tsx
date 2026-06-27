@@ -9,6 +9,7 @@ import {
   getElementBounds,
   getElementRectInParent,
   isGuiObject,
+  isLayoutObject,
   isResizable,
   rectToRobloxProps,
   resolvePosition,
@@ -66,6 +67,28 @@ export function CanvasElement({
   const isFolder = element.className === 'Folder' || element.isLayerGroup
 
   if (!element.visible || isFolder) {
+    return (
+      <>
+        {element.children.map((childId) => {
+          const child = elements[childId]
+          if (!child) return null
+          return (
+            <CanvasElement
+              key={childId}
+              element={child}
+              parentWidth={parentWidth}
+              parentHeight={parentHeight}
+              parentX={parentX}
+              parentY={parentY}
+            />
+          )
+        })}
+      </>
+    )
+  }
+
+  // Layout objects don't draw — but their children still need to render
+  if (isLayoutObject(element.className)) {
     return (
       <>
         {element.children.map((childId) => {
