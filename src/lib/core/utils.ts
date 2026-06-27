@@ -85,7 +85,7 @@ export function robloxFontToCss(font: string): string {
 }
 
 export function isGuiObject(element: UIElement): boolean {
-  const nonGui = ['UIStroke', 'UICorner', 'UIGradient', 'UIAspectRatioConstraint', 'UIPadding', 'UIListLayout', 'UIGridLayout', 'UIPageLayout']
+  const nonGui = ['UIStroke', 'UICorner', 'UIGradient', 'UIAspectRatioConstraint', 'UIPadding', 'UIScale', 'UIListLayout', 'UIGridLayout', 'UIPageLayout']
   return !nonGui.includes(element.className) && element.className !== 'Folder'
 }
 
@@ -94,7 +94,7 @@ export function isLayoutObject(className: string): boolean {
 }
 
 export function isModifierObject(className: string): boolean {
-  return ['UIStroke', 'UICorner', 'UIGradient', 'UIAspectRatioConstraint', 'UIPadding'].includes(className)
+  return ['UIStroke', 'UICorner', 'UIGradient', 'UIAspectRatioConstraint', 'UIPadding', 'UIScale'].includes(className)
 }
 
 export function getElementBounds(

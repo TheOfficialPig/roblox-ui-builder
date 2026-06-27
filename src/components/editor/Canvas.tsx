@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { UIElement } from '@/lib/core/types'
+import type { TextXAlignment, TextYAlignment, UIElement } from '@/lib/core/types'
 import { DEVICE_PRESETS } from '@/lib/core/types'
 import {
   applyResize,
@@ -22,6 +22,7 @@ import {
   cornerRadiusToCss,
   resolveAttachedModifiers,
 } from '@/lib/core/modifiers'
+import { computeLayoutRects, type LayoutRect } from '@/lib/core/layout-engine'
 import {
   buildElementVisualStyle,
   buildGradientStyle,
@@ -57,9 +58,23 @@ interface CanvasElementProps {
   parentHeight: number
   parentX: number
   parentY: number
+  layoutOverride?: LayoutRect
+}
+
+function textXToJustify(align: TextXAlignment): React.CSSProperties['justifyContent'] {
+  if (align === 'Left') return 'flex-start'
+  if (align === 'Right') return 'flex-end'
+  return 'center'
+}
+
+function textYToAlign(align: TextYAlignment): React.CSSProperties['alignItems'] {
+  if (align === 'Top') return 'flex-start'
+  if (align === 'Bottom') return 'flex-end'
+  return 'center'
 }
 
 function renderChildElements(
+  parent: UIElement,
   childIds: string[],
   elements: Record<string, UIElement>,
   parentWidth: number,
@@ -67,6 +82,8 @@ function renderChildElements(
   parentX: number,
   parentY: number,
 ): React.ReactNode {
+  const layoutRects = computeLayoutRects(parent, elements, parentWidth, parentHeight)
+
   return childIds.map((childId) => {
     const child = elements[childId]
     if (!child || !child.visible) return null
@@ -76,7 +93,7 @@ function renderChildElements(
     if (child.className === 'Folder' || child.isLayerGroup) {
       return (
         <span key={childId} style={{ display: 'contents' }}>
-          {renderChildElements(child.children, elements, parentWidth, parentHeight, parentX, parentY)}
+          {renderChildElements(parent, child.children, elements, parentWidth, parentHeight, parentX, parentY)}
         </span>
       )
     }
@@ -84,7 +101,7 @@ function renderChildElements(
     if (isLayoutObject(child.className)) {
       return (
         <span key={childId} style={{ display: 'contents' }}>
-          {renderChildElements(child.children, elements, parentWidth, parentHeight, parentX, parentY)}
+          {renderChildElements(parent, child.children, elements, parentWidth, parentHeight, parentX, parentY)}
         </span>
       )
     }
@@ -97,6 +114,7 @@ function renderChildElements(
         parentHeight={parentHeight}
         parentX={parentX}
         parentY={parentY}
+        layoutOverride={layoutRects[childId]}
       />
     )
   })
@@ -108,16 +126,20 @@ export function CanvasElement({
   parentHeight,
   parentX,
   parentY,
+  layoutOverride,
 }: CanvasElementProps) {
   const select = useEditorStore((s) => s.select)
   const elements = useEditorStore((s) => s.project.elements)
+  const animations = useEditorStore((s) =>
+    s.project.animations.filter((a) => a.elementId === element.id && a.enabled && a.autoPlay),
+  )
 
   const isFolder = element.className === 'Folder' || element.isLayerGroup
 
   if (!element.visible || isFolder) {
     return (
       <>
-        {renderChildElements(element.children, elements, parentWidth, parentHeight, parentX, parentY)}
+        {renderChildElements(element, element.children, elements, parentWidth, parentHeight, parentX, parentY)}
       </>
     )
   }
@@ -126,14 +148,14 @@ export function CanvasElement({
   if (isLayoutObject(element.className)) {
     return (
       <>
-        {renderChildElements(element.children, elements, parentWidth, parentHeight, parentX, parentY)}
+        {renderChildElements(element, element.children, elements, parentWidth, parentHeight, parentX, parentY)}
       </>
     )
   }
 
   if (!isGuiObject(element) && element.className !== 'ScreenGui') return null
 
-  const resolved = resolvePosition(
+  const resolved = layoutOverride ?? resolvePosition(
     element.position,
     element.size,
     element.anchorPoint,
@@ -172,6 +194,18 @@ export function CanvasElement({
 
   const combinedShadow = [effectStyle.boxShadow, strokeShadow].filter(Boolean).join(', ') || undefined
 
+  const uiScale = modifiers.uiScale?.scale ?? 1
+  const rotation = element.rotation || 0
+  const transforms: string[] = []
+  if (rotation) transforms.push(`rotate(${rotation}deg)`)
+  if (uiScale !== 1) transforms.push(`scale(${uiScale})`)
+
+  const fadeAnim = animations.find((a) => a.property === 'BackgroundTransparency')
+  const animOpacity =
+    fadeAnim?.targetTransparency !== undefined
+      ? 1 - fadeAnim.targetTransparency
+      : undefined
+
   const style: React.CSSProperties = mergeBackgrounds(
     {
       position: 'absolute',
@@ -180,10 +214,11 @@ export function CanvasElement({
       width: resolved.width,
       height: resolved.height,
       zIndex: element.zIndex,
-      transform: element.rotation ? `rotate(${element.rotation}deg)` : undefined,
+      transform: transforms.length > 0 ? transforms.join(' ') : undefined,
+      transformOrigin: 'center center',
       backgroundColor: colorToCss(
         element.backgroundColor3,
-        1 - element.backgroundTransparency,
+        (1 - element.backgroundTransparency) * (animOpacity ?? 1),
       ),
       borderColor: borderFx.enabled
         ? effectStyle.borderColor
@@ -204,9 +239,9 @@ export function CanvasElement({
       fontFamily: robloxFontToCss(element.font),
       fontWeight: element.font.includes('Bold') || element.font.includes('Black') ? 700 : 400,
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      textAlign: 'center',
+      alignItems: textYToAlign(element.textYAlignment ?? 'Center'),
+      justifyContent: textXToJustify(element.textXAlignment ?? 'Center'),
+      textAlign: (element.textXAlignment ?? 'Center').toLowerCase() as 'left' | 'center' | 'right',
       userSelect: 'none',
       boxSizing: 'border-box',
       boxShadow: combinedShadow,
@@ -267,6 +302,7 @@ export function CanvasElement({
         />
       )}
       {renderChildElements(
+        element,
         element.children,
         elements,
         resolved.width,

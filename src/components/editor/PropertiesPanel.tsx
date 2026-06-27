@@ -9,6 +9,8 @@ import {
 } from '@/lib/core/property-schema'
 import { useEditorStore } from '@/lib/store/editor-store'
 import { EffectsProperties } from './EffectsProperties'
+import { AnimationsSection } from './AnimationsSection'
+import { LookPresetsBar, ProjectThemeSection } from './ThemeLooksPanel'
 import {
   CheckboxInput,
   ColorInput,
@@ -183,6 +185,47 @@ function PropertyField({
           <CheckboxInput value={element.textWrapped} onChange={(textWrapped) => update({ textWrapped })} />
         </PropRow>
       )
+    case 'textXAlignment':
+      return (
+        <PropRow label={label}>
+          <SelectInput
+            value={element.textXAlignment ?? 'Center'}
+            onChange={(textXAlignment) =>
+              update({ textXAlignment: textXAlignment as 'Left' | 'Center' | 'Right' })
+            }
+            options={[
+              { value: 'Left', label: 'Left' },
+              { value: 'Center', label: 'Center' },
+              { value: 'Right', label: 'Right' },
+            ]}
+          />
+        </PropRow>
+      )
+    case 'textYAlignment':
+      return (
+        <PropRow label={label}>
+          <SelectInput
+            value={element.textYAlignment ?? 'Center'}
+            onChange={(textYAlignment) =>
+              update({ textYAlignment: textYAlignment as 'Top' | 'Center' | 'Bottom' })
+            }
+            options={[
+              { value: 'Top', label: 'Top' },
+              { value: 'Center', label: 'Center' },
+              { value: 'Bottom', label: 'Bottom' },
+            ]}
+          />
+        </PropRow>
+      )
+    case 'autoButtonColor':
+      return (
+        <PropRow label={label}>
+          <CheckboxInput
+            value={element.autoButtonColor ?? true}
+            onChange={(autoButtonColor) => update({ autoButtonColor })}
+          />
+        </PropRow>
+      )
     case 'font':
       return (
         <PropRow label={label}>
@@ -221,6 +264,24 @@ function PropertyField({
             value={element.imageTransparency}
             onChange={(imageTransparency) => update({ imageTransparency })}
             step={0.01}
+          />
+        </PropRow>
+      )
+    case 'scaleType':
+      return (
+        <PropRow label={label}>
+          <SelectInput
+            value={element.scaleType ?? 'Stretch'}
+            onChange={(scaleType) =>
+              update({ scaleType: scaleType as 'Stretch' | 'Slice' | 'Tile' | 'Fit' | 'Crop' })
+            }
+            options={[
+              { value: 'Stretch', label: 'Stretch' },
+              { value: 'Slice', label: 'Slice' },
+              { value: 'Tile', label: 'Tile' },
+              { value: 'Fit', label: 'Fit' },
+              { value: 'Crop', label: 'Crop' },
+            ]}
           />
         </PropRow>
       )
@@ -408,6 +469,17 @@ function PropertyField({
               { value: 'FitWithinMaxSize', label: 'Fit Within Max Size' },
               { value: 'ScaleWithParentSize', label: 'Scale With Parent' },
             ]}
+          />
+        </PropRow>
+      )
+    case 'uiScaleValue':
+      return (
+        <PropRow label={label}>
+          <NumberInput
+            value={element.uiScale?.scale ?? 1}
+            onChange={(scale) => update({ uiScale: { scale } })}
+            step={0.05}
+            min={0.1}
           />
         </PropRow>
       )
@@ -707,6 +779,7 @@ function ElementProperties({ element }: { element: UIElement }) {
 
   return (
     <div>
+      <LookPresetsBar />
       <div className="border-b border-studio-border bg-studio-accent/10 px-3 py-2">
         <span className="text-xs font-semibold text-studio-accent">{element.className}</span>
       </div>
@@ -731,6 +804,9 @@ function ElementProperties({ element }: { element: UIElement }) {
           </PropSection>
         )
       })}
+      {['Frame', 'TextLabel', 'TextButton', 'ImageLabel', 'ImageButton'].includes(element.className) && (
+        <AnimationsSection element={element} />
+      )}
     </div>
   )
 }
@@ -741,11 +817,14 @@ export function PropertiesPanel() {
 
   if (selectedIds.length === 0) {
     return (
-      <div className="flex h-full flex-col">
+      <div className="flex h-full flex-col overflow-hidden">
         <PanelHeader />
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-studio-elevated text-lg">◇</div>
-          <p className="text-xs text-studio-muted">Select an object to edit its properties</p>
+        <div className="flex-1 overflow-y-auto">
+          <ProjectThemeSection />
+          <div className="flex flex-col items-center justify-center gap-2 p-6 text-center">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-studio-elevated text-lg">◇</div>
+            <p className="text-xs text-studio-muted">Select an object to edit properties, apply looks, and add animations</p>
+          </div>
         </div>
       </div>
     )
@@ -769,6 +848,7 @@ export function PropertiesPanel() {
     <div className="flex h-full flex-col overflow-hidden">
       <PanelHeader />
       <div className="flex-1 overflow-y-auto">
+        <ProjectThemeSection />
         <ElementProperties element={element} />
       </div>
     </div>

@@ -34,6 +34,7 @@ const CLASS_ICONS: Record<string, string> = {
   UIListLayout: '☰',
   UIGridLayout: '▦',
   UIPageLayout: '📄',
+  UIScale: '⊕',
 }
 
 function TreeNode({ element, depth = 0 }: { element: UIElement; depth?: number }) {
@@ -236,26 +237,6 @@ export function LayersPanel() {
               <span className="ml-auto text-[10px] text-studio-muted">{el.className}</span>
             </button>
           ))}
-      </div>
-    </div>
-  )
-}
-
-export function AssetsPanel() {
-  return (
-    <div className="flex h-full flex-col">
-      <div className="border-b border-studio-border px-3 py-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-studio-muted">
-          Assets
-        </span>
-      </div>
-      <div className="flex flex-1 flex-col items-center justify-center p-4 text-center">
-        <Folder className="mb-2 h-8 w-8 text-studio-muted" />
-        <p className="text-xs text-studio-muted">
-          Asset library coming soon.
-          <br />
-          Upload images for ImageLabels and ImageButtons.
-        </p>
       </div>
     </div>
   )

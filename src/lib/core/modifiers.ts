@@ -3,6 +3,7 @@ import type {
   UICornerProps,
   UIGradientProps,
   UIPaddingProps,
+  UIScaleProps,
   UIStrokeProps,
   UIElement,
 } from './types'
@@ -14,6 +15,7 @@ export interface ResolvedModifiers {
   uiGradient?: UIGradientProps
   uiPadding?: UIPaddingProps
   uiAspectRatio?: UIAspectRatioConstraintProps
+  uiScale?: UIScaleProps
 }
 
 /** Merge modifier props from the element and attached modifier children (Roblox-style). */
@@ -28,6 +30,7 @@ export function resolveAttachedModifiers(
   if (element.uiGradient) resolved.uiGradient = element.uiGradient
   if (element.uiPadding) resolved.uiPadding = element.uiPadding
   if (element.uiAspectRatio) resolved.uiAspectRatio = element.uiAspectRatio
+  if (element.uiScale) resolved.uiScale = element.uiScale
 
   for (const childId of element.children) {
     const child = elements[childId]
@@ -49,10 +52,21 @@ export function resolveAttachedModifiers(
       case 'UIAspectRatioConstraint':
         if (child.uiAspectRatio) resolved.uiAspectRatio = child.uiAspectRatio
         break
+      case 'UIScale':
+        if (child.uiScale) resolved.uiScale = child.uiScale
+        break
     }
   }
 
   return resolved
+}
+
+export function resolveUIScale(
+  element: UIElement,
+  elements: Record<string, UIElement>,
+): number {
+  const mods = resolveAttachedModifiers(element, elements)
+  return mods.uiScale?.scale ?? 1
 }
 
 export function cornerRadiusToCss(

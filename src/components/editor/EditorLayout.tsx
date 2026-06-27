@@ -5,7 +5,9 @@ import { DesignCanvas } from './Canvas'
 import { Toolbar } from './Toolbar'
 import { BottomBar } from './BottomBar'
 import { PropertiesPanel } from './PropertiesPanel'
-import { ExplorerPanel, LayersPanel, AssetsPanel } from './Explorer'
+import { ExplorerPanel, LayersPanel } from './Explorer'
+import { AssetsPanel } from './AssetsPanel'
+import { ComponentsPanel } from './ComponentsPanel'
 import { useEditorStore } from '@/lib/store/editor-store'
 import { cn } from '@/lib/utils/cn'
 
@@ -16,6 +18,7 @@ function LeftSidebar() {
   const tabs = [
     { id: 'explorer' as const, label: 'Explorer' },
     { id: 'layers' as const, label: 'Layers' },
+    { id: 'components' as const, label: 'Components' },
     { id: 'assets' as const, label: 'Assets' },
   ]
 
@@ -41,6 +44,7 @@ function LeftSidebar() {
       <div className="flex-1 overflow-hidden">
         {tab === 'explorer' && <ExplorerPanel />}
         {tab === 'layers' && <LayersPanel />}
+        {tab === 'components' && <ComponentsPanel />}
         {tab === 'assets' && <AssetsPanel />}
       </div>
     </aside>

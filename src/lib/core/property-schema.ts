@@ -21,11 +21,15 @@ export type PropertyKey =
   | 'textSize'
   | 'textScaled'
   | 'textWrapped'
+  | 'textXAlignment'
+  | 'textYAlignment'
   | 'font'
   | 'richText'
+  | 'autoButtonColor'
   | 'image'
   | 'imageColor3'
   | 'imageTransparency'
+  | 'scaleType'
   | 'canvasSize'
   | 'scrollBarThickness'
   | 'uiStrokeColor'
@@ -39,6 +43,7 @@ export type PropertyKey =
   | 'uiPaddingRight'
   | 'uiAspectRatio'
   | 'uiAspectType'
+  | 'uiScaleValue'
   | 'uiListFillDirection'
   | 'uiListHorizontalAlignment'
   | 'uiListVerticalAlignment'
@@ -87,11 +92,15 @@ export const PROPERTY_LABELS: Record<PropertyKey, string> = {
   textSize: 'Text Size',
   textScaled: 'Text Scaled',
   textWrapped: 'Text Wrapped',
+  textXAlignment: 'Text X Align',
+  textYAlignment: 'Text Y Align',
   font: 'Font',
   richText: 'Rich Text',
+  autoButtonColor: 'Auto Button Color',
   image: 'Image ID / URL',
   imageColor3: 'Image Color',
   imageTransparency: 'Image Transparency',
+  scaleType: 'Scale Type',
   canvasSize: 'Canvas Size',
   scrollBarThickness: 'Scrollbar Thickness',
   uiStrokeColor: 'Color',
@@ -105,6 +114,7 @@ export const PROPERTY_LABELS: Record<PropertyKey, string> = {
   uiPaddingRight: 'Padding Right',
   uiAspectRatio: 'Aspect Ratio',
   uiAspectType: 'Aspect Type',
+  uiScaleValue: 'Scale',
   uiListFillDirection: 'Fill Direction',
   uiListHorizontalAlignment: 'Horizontal Align',
   uiListVerticalAlignment: 'Vertical Align',
@@ -163,14 +173,25 @@ const text: PropertySection = {
   id: 'text',
   title: 'Text',
   defaultOpen: true,
-  properties: ['text', 'textColor3', 'textSize', 'textScaled', 'textWrapped', 'font', 'richText'],
+  properties: [
+    'text',
+    'textColor3',
+    'textSize',
+    'textScaled',
+    'textWrapped',
+    'textXAlignment',
+    'textYAlignment',
+    'font',
+    'richText',
+    'autoButtonColor',
+  ],
 }
 
 const image: PropertySection = {
   id: 'image',
   title: 'Image',
   defaultOpen: true,
-  properties: ['image', 'imageColor3', 'imageTransparency'],
+  properties: ['image', 'imageColor3', 'imageTransparency', 'scaleType'],
 }
 
 const scroll: PropertySection = {
@@ -267,6 +288,13 @@ const pageLayoutProps: PropertySection = {
   ],
 }
 
+const scaleProps: PropertySection = {
+  id: 'scale',
+  title: 'Scale',
+  defaultOpen: true,
+  properties: ['uiScaleValue'],
+}
+
 export const PROPERTY_SCHEMA: Record<RobloxClassName, PropertySection[]> = {
   ScreenGui: [
     identity(['zIndex', 'clipsDescendants']),
@@ -288,6 +316,7 @@ export const PROPERTY_SCHEMA: Record<RobloxClassName, PropertySection[]> = {
   UIListLayout: [identity(), listLayoutProps],
   UIGridLayout: [identity(), gridLayoutProps],
   UIPageLayout: [identity(), pageLayoutProps],
+  UIScale: [identity(), scaleProps],
 }
 
 export function getPropertySections(className: RobloxClassName): PropertySection[] {

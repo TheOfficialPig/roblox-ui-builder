@@ -1,4 +1,4 @@
-import type { ProjectDocument, UIElement } from '../core/types'
+import type { ProjectDocument, UIAnimation, UIElement } from '../core/types'
 import { isGuiObject, isLayoutObject, isModifierObject } from '../core/utils'
 import {
   resolveBorderEffect,
@@ -67,14 +67,21 @@ function generateInstanceCode(element: UIElement, varName: string, level: number
     lines.push(`${pad}${varName}.TextSize = ${element.textSize},`)
     lines.push(`${pad}${varName}.TextScaled = ${element.textScaled},`)
     lines.push(`${pad}${varName}.TextWrapped = ${element.textWrapped},`)
+    lines.push(`${pad}${varName}.TextXAlignment = Enum.TextXAlignment.${element.textXAlignment ?? 'Center'},`)
+    lines.push(`${pad}${varName}.TextYAlignment = Enum.TextYAlignment.${element.textYAlignment ?? 'Center'},`)
     lines.push(`${pad}${varName}.Font = Enum.Font.${element.font},`)
     lines.push(`${pad}${varName}.RichText = ${element.richText},`)
+  }
+
+  if (element.className === 'TextButton') {
+    lines.push(`${pad}${varName}.AutoButtonColor = ${element.autoButtonColor ?? true},`)
   }
 
   if (['ImageLabel', 'ImageButton'].includes(element.className)) {
     if (element.image) lines.push(`${pad}${varName}.Image = "${element.image}",`)
     lines.push(formatColor3(`${varName}.ImageColor3`, element.imageColor3, level))
     lines.push(`${pad}${varName}.ImageTransparency = ${element.imageTransparency},`)
+    lines.push(`${pad}${varName}.ScaleType = Enum.ScaleType.${element.scaleType ?? 'Stretch'},`)
   }
 
   if (element.className === 'ScrollingFrame') {
@@ -299,6 +306,10 @@ function generateModifierCode(element: UIElement, varName: string, level: number
     lines.push(`${pad}${varName}.DominantAxis = Enum.DominantAxis.${element.uiAspectRatio.dominanceAxis},`)
   }
 
+  if (element.className === 'UIScale' && element.uiScale) {
+    lines.push(`${pad}${varName}.Scale = ${element.uiScale.scale},`)
+  }
+
   return lines
 }
 
@@ -406,6 +417,47 @@ function pad(level: number): string {
   return indent(level)
 }
 
+function generateAnimationCode(
+  animations: UIAnimation[],
+  elements: Record<string, UIElement>,
+  level: number,
+): string[] {
+  const lines: string[] = []
+  const pad = indent(level)
+
+  for (const anim of animations.filter((a) => a.enabled)) {
+    const el = elements[anim.elementId]
+    if (!el) continue
+    const varName = el.name.replace(/[^a-zA-Z0-9_]/g, '_')
+
+    lines.push(`${pad}-- Animation: ${anim.name}`)
+    lines.push(`${pad}task.delay(${anim.delay}, function()`)
+    lines.push(`${indent(level + 1)}local target = playerGui:FindFirstChild("${el.name.replace(/"/g, '\\"')}", true)`)
+    lines.push(`${indent(level + 1)}if not target then return end`)
+    lines.push(`${indent(level + 1)}local tweenInfo = TweenInfo.new(${anim.duration}, Enum.EasingStyle.${anim.easingStyle}, Enum.EasingDirection.${anim.easingDirection}${anim.loop ? ', -1' : ''})`)
+
+    if (anim.property === 'BackgroundTransparency') {
+      lines.push(`${indent(level + 1)}local tween = TweenService:Create(target, tweenInfo, { BackgroundTransparency = ${anim.targetTransparency ?? 0} })`)
+    } else if (anim.property === 'Rotation') {
+      lines.push(`${indent(level + 1)}local tween = TweenService:Create(target, tweenInfo, { Rotation = ${anim.targetRotation ?? 0} })`)
+    } else if (anim.property === 'Position' && anim.targetPosition) {
+      const p = anim.targetPosition
+      lines.push(`${indent(level + 1)}local tween = TweenService:Create(target, tweenInfo, { Position = UDim2.new(${p.xScale}, ${p.xOffset}, ${p.yScale}, ${p.yOffset}) })`)
+    } else if (anim.property === 'Size' && anim.targetSize) {
+      const s = anim.targetSize
+      lines.push(`${indent(level + 1)}local tween = TweenService:Create(target, tweenInfo, { Size = UDim2.new(${s.xScale}, ${s.xOffset}, ${s.yScale}, ${s.yOffset}) })`)
+    } else {
+      lines.push(`${indent(level + 1)}return`)
+    }
+
+    lines.push(`${indent(level + 1)}tween:Play()`)
+    lines.push(`${pad}end)`)
+    lines.push('')
+  }
+
+  return lines
+}
+
 export function exportToLua(project: ProjectDocument): string {
   const lines: string[] = [
     '--[[',
@@ -426,6 +478,13 @@ export function exportToLua(project: ProjectDocument): string {
 
   for (const rootId of project.rootIds) {
     walkTree(rootId, project.elements, 1, 'playerGui', lines, varCounter)
+  }
+
+  if (project.animations?.length) {
+    lines.push('')
+    lines.push(`${indent(1)}-- Animations`)
+    lines.push(`${indent(1)}local TweenService = game:GetService("TweenService")`)
+    lines.push(...generateAnimationCode(project.animations, project.elements, 1))
   }
 
   lines.push('')

@@ -16,11 +16,15 @@ export type RobloxClassName =
   | 'UIListLayout'
   | 'UIGridLayout'
   | 'UIPageLayout'
+  | 'UIScale'
 
 export type AutomaticSize = 'None' | 'X' | 'Y' | 'XY'
 export type FillDirection = 'Horizontal' | 'Vertical'
 export type HorizontalAlignment = 'Left' | 'Center' | 'Right'
 export type VerticalAlignment = 'Top' | 'Center' | 'Bottom'
+export type TextXAlignment = 'Left' | 'Center' | 'Right'
+export type TextYAlignment = 'Top' | 'Center' | 'Bottom'
+export type ScaleType = 'Stretch' | 'Slice' | 'Tile' | 'Fit' | 'Crop'
 export type SortOrder = 'Name' | 'Custom' | 'LayoutOrder'
 export type DevicePreview = 'phone' | 'tablet' | 'desktop'
 export type ExportFormat = 'lua' | 'png' | 'json'
@@ -160,6 +164,66 @@ export interface TextureEffect {
   tint: Color3
 }
 
+export interface UIScaleProps {
+  scale: number
+}
+
+export interface Rect {
+  minX: number
+  minY: number
+  maxX: number
+  maxY: number
+}
+
+export interface ProjectTheme {
+  name: string
+  primary: Color3
+  secondary: Color3
+  surface: Color3
+  raised: Color3
+  text: Color3
+  muted: Color3
+  accent: Color3
+  accent2: Color3
+  radius: number
+  fontTitle: string
+  fontBody: string
+}
+
+export interface SavedComponent {
+  id: string
+  name: string
+  elements: Record<string, UIElement>
+  rootIds: string[]
+  createdAt: string
+}
+
+export interface ProjectAsset {
+  id: string
+  name: string
+  rbxAssetId: string
+}
+
+export type AnimationProperty = 'Position' | 'Size' | 'BackgroundTransparency' | 'Rotation'
+
+export interface UIAnimation {
+  id: string
+  elementId: string
+  name: string
+  enabled: boolean
+  property: AnimationProperty
+  targetPosition?: UDim2
+  targetSize?: UDim2
+  targetTransparency?: number
+  targetRotation?: number
+  duration: number
+  delay: number
+  easingStyle: string
+  easingDirection: string
+  loop: boolean
+  autoPlay: boolean
+}
+
 export interface GradientPreset {
   id: string
   name: string
@@ -196,12 +260,17 @@ export interface UIElement {
   textSize: number
   textScaled: boolean
   textWrapped: boolean
+  textXAlignment: TextXAlignment
+  textYAlignment: TextYAlignment
   font: string
   richText: boolean
+  autoButtonColor: boolean
 
   image: string
   imageColor3: Color3
   imageTransparency: number
+  scaleType: ScaleType
+  sliceCenter: Rect
 
   canvasSize: UDim2
   scrollBarThickness: number
@@ -214,6 +283,7 @@ export interface UIElement {
   uiListLayout?: UIListLayoutProps
   uiGridLayout?: UIGridLayoutProps
   uiPageLayout?: UIPageLayoutProps
+  uiScale?: UIScaleProps
 
   dropShadow?: DropShadowEffect
   glow?: GlowEffect
@@ -231,6 +301,10 @@ export interface ProjectDocument {
   elements: Record<string, UIElement>
   rootIds: string[]
   devicePreview: DevicePreview
+  theme: ProjectTheme
+  components: SavedComponent[]
+  assets: ProjectAsset[]
+  animations: UIAnimation[]
   version: number
   createdAt: string
   updatedAt: string
@@ -350,4 +424,5 @@ export const CREATABLE_OBJECTS: Array<{
   { className: 'UIListLayout', label: 'UIListLayout', category: 'layout' },
   { className: 'UIGridLayout', label: 'UIGridLayout', category: 'layout' },
   { className: 'UIPageLayout', label: 'UIPageLayout', category: 'layout' },
+  { className: 'UIScale', label: 'UIScale', category: 'modifier' },
 ]

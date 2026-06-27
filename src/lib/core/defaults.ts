@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
-import type { RobloxClassName, UIElement } from './types'
+import type { RobloxClassName, ProjectDocument, UIElement } from './types'
+import { DEFAULT_THEME } from './theme'
 import { color3, udim, udim2Offset } from './utils'
 
 const DEFAULTS: Omit<UIElement, 'id' | 'className' | 'name' | 'parentId' | 'children'> = {
@@ -23,11 +24,16 @@ const DEFAULTS: Omit<UIElement, 'id' | 'className' | 'name' | 'parentId' | 'chil
   textSize: 14,
   textScaled: false,
   textWrapped: false,
+  textXAlignment: 'Center',
+  textYAlignment: 'Center',
   font: 'Gotham',
   richText: false,
+  autoButtonColor: true,
   image: '',
   imageColor3: color3(255, 255, 255),
   imageTransparency: 0,
+  scaleType: 'Stretch',
+  sliceCenter: { minX: 0, minY: 0, maxX: 0, maxY: 0 },
   canvasSize: udim2Offset(400, 400),
   scrollBarThickness: 12,
   dropShadow: {
@@ -185,6 +191,10 @@ const CLASS_OVERRIDES: Partial<Record<RobloxClassName, Partial<UIElement>>> = {
       easingDirection: 'Out',
     },
   },
+  UIScale: {
+    backgroundTransparency: 1,
+    uiScale: { scale: 1 },
+  },
 }
 
 let nameCounter: Record<string, number> = {}
@@ -215,7 +225,7 @@ export function createElement(
   }
 }
 
-export function createEmptyProject(name = 'Untitled Project') {
+export function createEmptyProject(name = 'Untitled Project'): ProjectDocument {
   const screenGui = createElement('ScreenGui', { name: 'ScreenGui' })
   return {
     id: uuidv4(),
@@ -223,8 +233,35 @@ export function createEmptyProject(name = 'Untitled Project') {
     elements: { [screenGui.id]: screenGui },
     rootIds: [screenGui.id],
     devicePreview: 'desktop' as const,
+    theme: { ...DEFAULT_THEME },
+    components: [],
+    assets: [],
+    animations: [],
     version: 1,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+  }
+}
+
+export function normalizeProject(project: ProjectDocument): ProjectDocument {
+  return {
+    ...project,
+    theme: project.theme ?? { ...DEFAULT_THEME },
+    components: project.components ?? [],
+    assets: project.assets ?? [],
+    animations: project.animations ?? [],
+    elements: Object.fromEntries(
+      Object.entries(project.elements).map(([id, el]) => [
+        id,
+        {
+          ...el,
+          textXAlignment: el.textXAlignment ?? 'Center',
+          textYAlignment: el.textYAlignment ?? 'Center',
+          autoButtonColor: el.autoButtonColor ?? true,
+          scaleType: el.scaleType ?? 'Stretch',
+          sliceCenter: el.sliceCenter ?? { minX: 0, minY: 0, maxX: 0, maxY: 0 },
+        } as UIElement,
+      ]),
+    ),
   }
 }

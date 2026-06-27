@@ -3,14 +3,23 @@ import { immer } from 'zustand/middleware/immer'
 import type {
   CanvasViewport,
   DevicePreview,
+  ProjectAsset,
   ProjectDocument,
+  ProjectTheme,
   RobloxClassName,
+  SavedComponent,
+  UIAnimation,
   UIElement,
 } from '../core/types'
 import { DEVICE_PRESETS } from '../core/types'
 import { resizeProjectElements } from '../core/device-resize'
-import { createElement, createEmptyProject } from '../core/defaults'
+import { createComponentFromSelection, insertComponentIntoProject } from '../core/components'
+import { BUILTIN_COMPONENTS } from '../core/builtin-components'
+import { applyLookPreset } from '../core/look-presets'
+import { applyThemeToElement } from '../core/theme'
+import { createElement, createEmptyProject, normalizeProject } from '../core/defaults'
 import { getParentDimensions, isGuiObject, udim2Offset } from '../core/utils'
+import { v4 as uuidv4 } from 'uuid'
 
 const MAX_HISTORY = 50
 
@@ -27,7 +36,7 @@ interface EditorState {
   snapEnabled: boolean
   gridSize: number
   showGuides: boolean
-  leftPanelTab: 'explorer' | 'layers' | 'assets'
+  leftPanelTab: 'explorer' | 'layers' | 'assets' | 'components'
   isDragging: boolean
   isPanning: boolean
   mousePosition: { x: number; y: number }
@@ -71,6 +80,18 @@ interface EditorActions {
   pushHistory: () => void
   markClean: () => void
   loadTemplate: (project: ProjectDocument) => void
+  setTheme: (theme: ProjectTheme) => void
+  applyThemeToSelected: (role?: 'surface' | 'raised' | 'primary' | 'secondary' | 'accent') => void
+  applyLookToSelected: (presetId: string) => void
+  saveSelectionAsComponent: (name: string) => void
+  insertComponent: (componentId: string, parentId?: string | null) => void
+  deleteComponent: (componentId: string) => void
+  addAsset: (name: string, rbxAssetId: string) => void
+  removeAsset: (assetId: string) => void
+  applyAssetToSelected: (assetId: string) => void
+  addAnimation: (elementId: string) => string
+  updateAnimation: (id: string, updates: Partial<UIAnimation>) => void
+  removeAnimation: (id: string) => void
 }
 
 function cloneProject(project: ProjectDocument): ProjectDocument {
@@ -113,12 +134,13 @@ export const useEditorStore = create<EditorState & EditorActions>()(
 
     loadProject: (project) =>
       set((state) => {
-        state.project = cloneProject(project)
+        const normalized = normalizeProject(cloneProject(project))
+        state.project = normalized
         state.selectedIds = []
-        state.history = [cloneProject(project)]
+        state.history = [cloneProject(normalized)]
         state.historyIndex = 0
         state.isDirty = false
-        const device = DEVICE_PRESETS[project.devicePreview]
+        const device = DEVICE_PRESETS[normalized.devicePreview]
         const zoom = Math.min(1.25, 720 / device.width)
         state.viewport = { zoom, panX: 60, panY: 32 }
       }),
@@ -470,6 +492,148 @@ export const useEditorStore = create<EditorState & EditorActions>()(
       get().loadProject(project)
       get().pushHistory()
     },
+
+    setTheme: (theme) =>
+      set((state) => {
+        state.project.theme = theme
+        state.project.updatedAt = new Date().toISOString()
+        state.isDirty = true
+      }),
+
+    applyThemeToSelected: (role = 'surface') => {
+      const { selectedIds, project } = get()
+      if (selectedIds.length === 0) return
+      set((state) => {
+        for (const id of selectedIds) {
+          const el = state.project.elements[id]
+          if (!el) continue
+          Object.assign(el, applyThemeToElement(el, state.project.theme, role))
+        }
+        state.project.updatedAt = new Date().toISOString()
+      })
+      get().pushHistory()
+    },
+
+    applyLookToSelected: (presetId) => {
+      const { selectedIds } = get()
+      if (selectedIds.length === 0) return
+      set((state) => {
+        for (const id of selectedIds) {
+          const el = state.project.elements[id]
+          if (!el) continue
+          Object.assign(el, applyLookPreset(el, presetId))
+        }
+        state.project.updatedAt = new Date().toISOString()
+      })
+      get().pushHistory()
+    },
+
+    saveSelectionAsComponent: (name) => {
+      const { selectedIds, project } = get()
+      const component = createComponentFromSelection(project.elements, selectedIds, name)
+      if (!component) return
+      set((state) => {
+        state.project.components.push(component)
+        state.project.updatedAt = new Date().toISOString()
+      })
+      get().pushHistory()
+    },
+
+    insertComponent: (componentId, parentId) => {
+      const { project, selectedIds } = get()
+      const component =
+        project.components.find((c) => c.id === componentId) ??
+        BUILTIN_COMPONENTS.find((c) => c.id === componentId)
+      if (!component) return
+      const targetParentId = parentId ?? selectedIds[0] ?? project.rootIds[0]
+      if (!targetParentId) return
+
+      set((state) => {
+        const inserted = insertComponentIntoProject(
+          state.project.elements,
+          component,
+          targetParentId,
+          16,
+          16,
+        )
+        state.selectedIds = inserted
+        state.project.updatedAt = new Date().toISOString()
+      })
+      get().pushHistory()
+    },
+
+    deleteComponent: (componentId) =>
+      set((state) => {
+        state.project.components = state.project.components.filter((c) => c.id !== componentId)
+        state.project.updatedAt = new Date().toISOString()
+      }),
+
+    addAsset: (name, rbxAssetId) =>
+      set((state) => {
+        state.project.assets.push({
+          id: uuidv4(),
+          name,
+          rbxAssetId: rbxAssetId.startsWith('rbxasset') ? rbxAssetId : `rbxassetid://${rbxAssetId.replace(/\D/g, '')}`,
+        })
+        state.project.updatedAt = new Date().toISOString()
+      }),
+
+    removeAsset: (assetId) =>
+      set((state) => {
+        state.project.assets = state.project.assets.filter((a) => a.id !== assetId)
+        state.project.updatedAt = new Date().toISOString()
+      }),
+
+    applyAssetToSelected: (assetId) => {
+      const asset = get().project.assets.find((a) => a.id === assetId)
+      if (!asset) return
+      const { selectedIds } = get()
+      set((state) => {
+        for (const id of selectedIds) {
+          const el = state.project.elements[id]
+          if (!el || !['ImageLabel', 'ImageButton'].includes(el.className)) continue
+          el.image = asset.rbxAssetId
+        }
+        state.project.updatedAt = new Date().toISOString()
+      })
+      get().pushHistory()
+    },
+
+    addAnimation: (elementId) => {
+      const anim: UIAnimation = {
+        id: uuidv4(),
+        elementId,
+        name: 'Fade In',
+        enabled: true,
+        property: 'BackgroundTransparency',
+        targetTransparency: 0,
+        duration: 0.4,
+        delay: 0,
+        easingStyle: 'Quad',
+        easingDirection: 'Out',
+        loop: false,
+        autoPlay: true,
+      }
+      set((state) => {
+        state.project.animations.push(anim)
+        state.project.updatedAt = new Date().toISOString()
+      })
+      get().pushHistory()
+      return anim.id
+    },
+
+    updateAnimation: (id, updates) =>
+      set((state) => {
+        const anim = state.project.animations.find((a) => a.id === id)
+        if (anim) Object.assign(anim, updates)
+        state.project.updatedAt = new Date().toISOString()
+      }),
+
+    removeAnimation: (id) =>
+      set((state) => {
+        state.project.animations = state.project.animations.filter((a) => a.id !== id)
+        state.project.updatedAt = new Date().toISOString()
+      }),
   })),
 )
 
