@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+@theme {
+  --color-studio-bg: #1e1e1e;
+  --color-studio-panel: #252526;
+  --color-studio-border: #3c3c3c;
+  --color-studio-accent: #0078d4;
+  --color-studio-accent-hover: #1a86d9;
+  --color-studio-text: #cccccc;
+  --color-studio-text-muted: #858585;
+  --color-studio-input: #3c3c3c;
+  --color-studio-hover: #2a2d2e;
+  --color-studio-selected: #094771;
+  --color-canvas-bg: #161616;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--color-studio-bg);
+  color: var(--color-studio-text);
+  font-family: 'Segoe UI', Inter, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+}
+
+.canvas-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}
+
+.selection-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border: 1px solid var(--color-studio-accent);
+  border-radius: 1px;
+  z-index: 10000;
+}
+
+.snap-guide-h {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #ff6b6b;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.snap-guide-v {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #ff6b6b;
+  pointer-events: none;
+  z-index: 9999;
+}
