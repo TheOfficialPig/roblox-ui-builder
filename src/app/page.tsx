@@ -1,7 +1,9 @@
 'use client'
 
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { ArrowRight, Code2, Layers, Play, Smartphone } from 'lucide-react'
+import { AuthNav } from '@/components/AuthNav'
 import { HomeHeroMockup } from '@/components/marketing/HomeHeroMockup'
 
 const TEMPLATES = [
@@ -43,6 +45,9 @@ const BENTO = [
 ]
 
 export default function HomePage() {
+  const { status } = useSession()
+  const isAuthed = status === 'authenticated'
+
   return (
     <div className="page-scroll min-h-screen bg-[#07070b] text-studio-text">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -73,15 +78,7 @@ export default function HomePage() {
             </a>
           </nav>
           <div className="flex items-center gap-2">
-            <Link href="/login" className="rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white">
-              Log in
-            </Link>
-            <Link
-              href="/signup"
-              className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-[#07070b] transition hover:bg-white/90"
-            >
-              Get started
-            </Link>
+            <AuthNav variant="dark" />
           </div>
         </div>
       </header>
@@ -104,19 +101,29 @@ export default function HomePage() {
             and desktop — then drop the Lua into your game.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
+            {isAuthed ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#07070b] transition hover:bg-white/90"
+              >
+                Open dashboard
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            ) : (
+              <Link
+                href="/signup"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#07070b] transition hover:bg-white/90"
+              >
+                Start building
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            )}
             <Link
-              href="/signup"
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-[#07070b] transition hover:bg-white/90"
-            >
-              Start building
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/editor/new"
+              href={isAuthed ? '/dashboard' : '/login'}
               className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-5 py-3 text-sm font-medium text-white/80 transition hover:border-white/20 hover:bg-white/5"
             >
               <Play className="h-3.5 w-3.5 fill-current" />
-              Try the editor
+              {isAuthed ? 'My projects' : 'Try the editor'}
             </Link>
           </div>
           <dl className="mt-12 flex gap-10 border-t border-white/5 pt-8">
@@ -231,10 +238,10 @@ export default function HomePage() {
             Free to start. Projects save to your account.
           </p>
           <Link
-            href="/signup"
+            href={isAuthed ? '/dashboard' : '/signup'}
             className="relative mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-[#07070b] transition hover:bg-white/90"
           >
-            Create free account
+            {isAuthed ? 'Go to dashboard' : 'Create free account'}
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>

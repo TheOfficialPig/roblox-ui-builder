@@ -10,6 +10,7 @@ import {
   getElementRectInParent,
   isGuiObject,
   isLayoutObject,
+  isModifierObject,
   isResizable,
   rectToRobloxProps,
   resolvePosition,
@@ -17,6 +18,10 @@ import {
   snapDimension,
   type ResizeHandle,
 } from '@/lib/core/utils'
+import {
+  cornerRadiusToCss,
+  resolveAttachedModifiers,
+} from '@/lib/core/modifiers'
 import {
   buildElementVisualStyle,
   buildGradientStyle,
@@ -54,6 +59,49 @@ interface CanvasElementProps {
   parentY: number
 }
 
+function renderChildElements(
+  childIds: string[],
+  elements: Record<string, UIElement>,
+  parentWidth: number,
+  parentHeight: number,
+  parentX: number,
+  parentY: number,
+): React.ReactNode {
+  return childIds.map((childId) => {
+    const child = elements[childId]
+    if (!child || !child.visible) return null
+
+    if (isModifierObject(child.className)) return null
+
+    if (child.className === 'Folder' || child.isLayerGroup) {
+      return (
+        <span key={childId} style={{ display: 'contents' }}>
+          {renderChildElements(child.children, elements, parentWidth, parentHeight, parentX, parentY)}
+        </span>
+      )
+    }
+
+    if (isLayoutObject(child.className)) {
+      return (
+        <span key={childId} style={{ display: 'contents' }}>
+          {renderChildElements(child.children, elements, parentWidth, parentHeight, parentX, parentY)}
+        </span>
+      )
+    }
+
+    return (
+      <CanvasElement
+        key={childId}
+        element={child}
+        parentWidth={parentWidth}
+        parentHeight={parentHeight}
+        parentX={parentX}
+        parentY={parentY}
+      />
+    )
+  })
+}
+
 export function CanvasElement({
   element,
   parentWidth,
@@ -69,20 +117,7 @@ export function CanvasElement({
   if (!element.visible || isFolder) {
     return (
       <>
-        {element.children.map((childId) => {
-          const child = elements[childId]
-          if (!child) return null
-          return (
-            <CanvasElement
-              key={childId}
-              element={child}
-              parentWidth={parentWidth}
-              parentHeight={parentHeight}
-              parentX={parentX}
-              parentY={parentY}
-            />
-          )
-        })}
+        {renderChildElements(element.children, elements, parentWidth, parentHeight, parentX, parentY)}
       </>
     )
   }
@@ -91,20 +126,7 @@ export function CanvasElement({
   if (isLayoutObject(element.className)) {
     return (
       <>
-        {element.children.map((childId) => {
-          const child = elements[childId]
-          if (!child) return null
-          return (
-            <CanvasElement
-              key={childId}
-              element={child}
-              parentWidth={parentWidth}
-              parentHeight={parentHeight}
-              parentX={parentX}
-              parentY={parentY}
-            />
-          )
-        })}
+        {renderChildElements(element.children, elements, parentWidth, parentHeight, parentX, parentY)}
       </>
     )
   }
@@ -128,14 +150,27 @@ export function CanvasElement({
     select([element.id], e.shiftKey)
   }
 
-  const cornerRadius = element.uiCorner
-    ? element.uiCorner.cornerRadius.xOffset
+  const modifiers = resolveAttachedModifiers(element, elements)
+  const cornerRadius = modifiers.uiCorner
+    ? cornerRadiusToCss(modifiers.uiCorner, resolved.width, resolved.height)
     : 0
 
   const effectStyle = buildElementVisualStyle(element)
   const borderFx = resolveBorderEffect(element)
   const textureOverlay = getTextureOverlayStyle(element)
-  const gradient = buildGradientStyle(element)
+  const gradient = modifiers.uiGradient
+    ? buildGradientStyle({ ...element, uiGradient: modifiers.uiGradient })
+    : buildGradientStyle(element)
+
+  const strokeShadow =
+    modifiers.uiStroke && modifiers.uiStroke.applyStrokeMode !== 'Contextual'
+      ? `0 0 0 ${modifiers.uiStroke.thickness}px ${colorToCss(
+          modifiers.uiStroke.color,
+          1 - modifiers.uiStroke.transparency,
+        )}`
+      : undefined
+
+  const combinedShadow = [effectStyle.boxShadow, strokeShadow].filter(Boolean).join(', ') || undefined
 
   const style: React.CSSProperties = mergeBackgrounds(
     {
@@ -160,7 +195,10 @@ export function CanvasElement({
           ? 'solid'
           : undefined,
       borderRadius: cornerRadius,
-      overflow: element.clipsDescendants ? 'hidden' : 'visible',
+      overflow:
+        element.clipsDescendants || (modifiers.uiCorner && cornerRadius !== 0)
+          ? 'hidden'
+          : 'visible',
       color: colorToCss(element.textColor3),
       fontSize: element.textScaled ? undefined : element.textSize,
       fontFamily: robloxFontToCss(element.font),
@@ -171,76 +209,72 @@ export function CanvasElement({
       textAlign: 'center',
       userSelect: 'none',
       boxSizing: 'border-box',
-      boxShadow: effectStyle.boxShadow,
+      boxShadow: combinedShadow,
     },
     gradient,
   )
 
-  if (element.uiStroke) {
-    style.outline = `${element.uiStroke.thickness}px solid ${colorToCss(element.uiStroke.color, 1 - element.uiStroke.transparency)}`
+  if (modifiers.uiStroke?.applyStrokeMode === 'Contextual') {
+    style.WebkitTextStroke = `${modifiers.uiStroke.thickness}px ${colorToCss(
+      modifiers.uiStroke.color,
+      1 - modifiers.uiStroke.transparency,
+    )}`
   }
 
   const isTextElement = ['TextLabel', 'TextButton'].includes(element.className)
   const isImageElement = ['ImageLabel', 'ImageButton'].includes(element.className)
+  const padding = modifiers.uiPadding ?? element.uiPadding
 
   return (
-    <>
-      <div
-        data-element-id={element.id}
-        data-exportable="true"
-        className="canvas-element"
-        style={style}
-        onMouseDown={handleMouseDown}
-      >
-        {textureOverlay && <div aria-hidden style={textureOverlay} />}
-        {isTextElement && (
-          <span
-            style={{
-              padding: element.uiPadding
-                ? `${element.uiPadding.paddingTop}px ${element.uiPadding.paddingRight}px ${element.uiPadding.paddingBottom}px ${element.uiPadding.paddingLeft}px`
-                : '4px 8px',
-              width: '100%',
-              wordBreak: element.textWrapped ? 'break-word' : undefined,
-              fontSize: element.textScaled
-                ? Math.min(resolved.height * 0.4, resolved.width * 0.15)
-                : element.textSize,
-            }}
-          >
-            {element.text}
-          </span>
-        )}
-        {isImageElement && element.image && (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              backgroundImage:
-                element.image.startsWith('http') || element.image.startsWith('rbxasset')
-                  ? `url(${element.image})`
-                  : undefined,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              opacity: 1 - element.imageTransparency,
-            }}
-          />
-        )}
-      </div>
-
-      {element.children.map((childId) => {
-        const child = elements[childId]
-        if (!child) return null
-        return (
-          <CanvasElement
-            key={childId}
-            element={child}
-            parentWidth={resolved.width}
-            parentHeight={resolved.height}
-            parentX={absX}
-            parentY={absY}
-          />
-        )
-      })}
-    </>
+    <div
+      data-element-id={element.id}
+      data-exportable="true"
+      className="canvas-element"
+      style={style}
+      onMouseDown={handleMouseDown}
+    >
+      {textureOverlay && <div aria-hidden style={textureOverlay} />}
+      {isTextElement && (
+        <span
+          style={{
+            padding: padding
+              ? `${padding.paddingTop}px ${padding.paddingRight}px ${padding.paddingBottom}px ${padding.paddingLeft}px`
+              : '4px 8px',
+            width: '100%',
+            wordBreak: element.textWrapped ? 'break-word' : undefined,
+            fontSize: element.textScaled
+              ? Math.min(resolved.height * 0.4, resolved.width * 0.15)
+              : element.textSize,
+          }}
+        >
+          {element.text}
+        </span>
+      )}
+      {isImageElement && element.image && (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundImage:
+              element.image.startsWith('http') || element.image.startsWith('rbxasset')
+                ? `url(${element.image})`
+                : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 1 - element.imageTransparency,
+            borderRadius: 'inherit',
+          }}
+        />
+      )}
+      {renderChildElements(
+        element.children,
+        elements,
+        resolved.width,
+        resolved.height,
+        absX,
+        absY,
+      )}
+    </div>
   )
 }
 

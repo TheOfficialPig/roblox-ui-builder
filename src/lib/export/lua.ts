@@ -252,6 +252,102 @@ function generateEffectLines(element: UIElement, varName: string, level: number)
   return lines
 }
 
+function generateModifierCode(element: UIElement, varName: string, level: number): string[] {
+  const lines: string[] = []
+  const pad = indent(level)
+
+  lines.push(`${pad}local ${varName} = Instance.new("${element.className}")`)
+  lines.push(`${pad}${varName}.Name = "${element.name.replace(/"/g, '\\"')}"`)
+
+  if (element.className === 'UICorner' && element.uiCorner) {
+    lines.push(formatUDim2(`${varName}.CornerRadius`, element.uiCorner.cornerRadius, level))
+  }
+
+  if (element.className === 'UIStroke' && element.uiStroke) {
+    lines.push(formatColor3(`${varName}.Color`, element.uiStroke.color, level))
+    lines.push(`${pad}${varName}.Thickness = ${element.uiStroke.thickness},`)
+    lines.push(`${pad}${varName}.Transparency = ${element.uiStroke.transparency},`)
+    lines.push(`${pad}${varName}.ApplyStrokeMode = Enum.ApplyStrokeMode.${element.uiStroke.applyStrokeMode},`)
+    lines.push(`${pad}${varName}.LineJoinMode = Enum.LineJoinMode.${element.uiStroke.lineJoinMode},`)
+  }
+
+  if (element.className === 'UIGradient' && element.uiGradient) {
+    const g = element.uiGradient
+    lines.push(`${pad}${varName}.Rotation = ${g.rotation},`)
+    lines.push(formatVector2(`${varName}.Offset`, g.offset, level))
+    const colorKeypoints = g.colorSequence
+      .map((k) => `ColorSequenceKeypoint.new(${k.offset}, Color3.fromRGB(${k.color.r}, ${k.color.g}, ${k.color.b}))`)
+      .join(', ')
+    lines.push(`${pad}${varName}.Color = ColorSequence.new({${colorKeypoints}}),`)
+    const transKeypoints = g.transparencySequence
+      .map((k) => `NumberSequenceKeypoint.new(${k.offset}, ${k.transparency})`)
+      .join(', ')
+    lines.push(`${pad}${varName}.Transparency = NumberSequence.new({${transKeypoints}}),`)
+  }
+
+  if (element.className === 'UIPadding' && element.uiPadding) {
+    const p = element.uiPadding
+    lines.push(`${pad}${varName}.PaddingTop = UDim.new(0, ${p.paddingTop}),`)
+    lines.push(`${pad}${varName}.PaddingBottom = UDim.new(0, ${p.paddingBottom}),`)
+    lines.push(`${pad}${varName}.PaddingLeft = UDim.new(0, ${p.paddingLeft}),`)
+    lines.push(`${pad}${varName}.PaddingRight = UDim.new(0, ${p.paddingRight}),`)
+  }
+
+  if (element.className === 'UIAspectRatioConstraint' && element.uiAspectRatio) {
+    lines.push(`${pad}${varName}.AspectRatio = ${element.uiAspectRatio.aspectRatio},`)
+    lines.push(`${pad}${varName}.AspectType = Enum.AspectType.${element.uiAspectRatio.aspectType},`)
+    lines.push(`${pad}${varName}.DominantAxis = Enum.DominantAxis.${element.uiAspectRatio.dominanceAxis},`)
+  }
+
+  return lines
+}
+
+function generateLayoutCode(element: UIElement, varName: string, level: number): string[] {
+  const lines: string[] = []
+  const pad = indent(level)
+
+  lines.push(`${pad}local ${varName} = Instance.new("${element.className}")`)
+  lines.push(`${pad}${varName}.Name = "${element.name.replace(/"/g, '\\"')}"`)
+
+  if (element.uiListLayout) {
+    const l = element.uiListLayout
+    lines.push(`${pad}${varName}.FillDirection = Enum.FillDirection.${l.fillDirection},`)
+    lines.push(`${pad}${varName}.HorizontalAlignment = Enum.HorizontalAlignment.${l.horizontalAlignment},`)
+    lines.push(`${pad}${varName}.VerticalAlignment = Enum.VerticalAlignment.${l.verticalAlignment},`)
+    lines.push(formatUDim2(`${varName}.Padding`, l.padding, level))
+    lines.push(`${pad}${varName}.SortOrder = Enum.SortOrder.${l.sortOrder},`)
+  }
+
+  if (element.uiGridLayout) {
+    const g = element.uiGridLayout
+    lines.push(formatUDim2(`${varName}.CellSize`, g.cellSize, level))
+    lines.push(formatUDim2(`${varName}.CellPadding`, g.cellPadding, level))
+    lines.push(`${pad}${varName}.FillDirection = Enum.FillDirection.${g.fillDirection},`)
+    lines.push(`${pad}${varName}.HorizontalAlignment = Enum.HorizontalAlignment.${g.horizontalAlignment},`)
+    lines.push(`${pad}${varName}.VerticalAlignment = Enum.VerticalAlignment.${g.verticalAlignment},`)
+    lines.push(`${pad}${varName}.SortOrder = Enum.SortOrder.${g.sortOrder},`)
+    lines.push(`${pad}${varName}.StartCorner = Enum.StartCorner.${g.startCorner},`)
+  }
+
+  if (element.uiPageLayout) {
+    const p = element.uiPageLayout
+    lines.push(`${pad}${varName}.FillDirection = Enum.FillDirection.${p.fillDirection},`)
+    lines.push(`${pad}${varName}.HorizontalAlignment = Enum.HorizontalAlignment.${p.horizontalAlignment},`)
+    lines.push(`${pad}${varName}.VerticalAlignment = Enum.VerticalAlignment.${p.verticalAlignment},`)
+    lines.push(`${pad}${varName}.SortOrder = Enum.SortOrder.${p.sortOrder},`)
+    lines.push(`${pad}${varName}.GamepadInputEnabled = ${p.gamepadInputEnabled},`)
+    lines.push(`${pad}${varName}.ScrollWheelInputEnabled = ${p.scrollWheelInputEnabled},`)
+    lines.push(`${pad}${varName}.TouchInputEnabled = ${p.touchInputEnabled},`)
+    lines.push(`${pad}${varName}.Circular = ${p.circular},`)
+    lines.push(`${pad}${varName}.EasingDirection = Enum.EasingDirection.${p.easingDirection},`)
+    lines.push(`${pad}${varName}.EasingStyle = Enum.EasingStyle.${p.easingStyle},`)
+    lines.push(formatUDim2(`${varName}.Padding`, p.padding, level))
+    lines.push(`${pad}${varName}.TweenTime = ${p.tweenTime},`)
+  }
+
+  return lines
+}
+
 function walkTree(
   elementId: string,
   elements: Record<string, UIElement>,
@@ -263,7 +359,33 @@ function walkTree(
   const element = elements[elementId]
   if (!element || element.isLayerGroup) return
 
-  if (isLayoutObject(element.className) || isModifierObject(element.className)) {
+  if (element.className === 'Folder') {
+    for (const childId of element.children) {
+      walkTree(childId, elements, level, parentVar, lines, varCounter)
+    }
+    return
+  }
+
+  if (isModifierObject(element.className)) {
+    varCounter.count++
+    const varName = `mod_${varCounter.count}`
+    lines.push('')
+    lines.push(`${indent(level)}-- ${element.className}: ${element.name}`)
+    lines.push(...generateModifierCode(element, varName, level))
+    lines.push(`${pad(level)}${varName}.Parent = ${parentVar}`)
+    return
+  }
+
+  if (isLayoutObject(element.className)) {
+    varCounter.count++
+    const varName = `layout_${varCounter.count}`
+    lines.push('')
+    lines.push(`${indent(level)}-- ${element.className}: ${element.name}`)
+    lines.push(...generateLayoutCode(element, varName, level))
+    lines.push(`${pad(level)}${varName}.Parent = ${parentVar}`)
+    for (const childId of element.children) {
+      walkTree(childId, elements, level, parentVar, lines, varCounter)
+    }
     return
   }
 
