@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { createEmptyProject } from '@/lib/core/defaults'
 import { TEMPLATE_CATALOG } from '@/lib/templates'
+import { TemplateCard } from '@/components/dashboard/TemplateCard'
 import type { ProjectDocument } from '@/lib/core/types'
 import {
   createProjectApi,
@@ -140,21 +141,24 @@ export default function DashboardPage() {
 
         {showTemplates && (
           <section className="mb-10">
-            <h2 className="mb-4 text-lg font-semibold text-white">Templates</h2>
+            <div className="mb-5 flex items-end justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-white">Starter templates</h2>
+                <p className="mt-1 text-sm text-studio-muted">
+                  Free layouts to jump in — customize everything in the editor.
+                </p>
+              </div>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {TEMPLATE_CATALOG.map((template) => (
-                <button
+                <TemplateCard
                   key={template.id}
-                  type="button"
+                  templateId={template.id}
+                  name={template.name}
+                  description={template.description}
+                  category={template.category}
                   onClick={() => createProject(template.build())}
-                  className="rounded-xl border border-studio-border bg-studio-panel p-4 text-left transition hover:border-studio-accent/50 hover:bg-studio-elevated"
-                >
-                  <div className="mb-2 text-xs font-medium uppercase tracking-wide text-studio-accent">
-                    {template.category}
-                  </div>
-                  <div className="mb-1 font-medium text-white">{template.name}</div>
-                  <div className="text-sm text-studio-muted">{template.description}</div>
-                </button>
+                />
               ))}
             </div>
           </section>

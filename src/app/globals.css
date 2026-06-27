@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -13,6 +14,8 @@
   --color-studio-hover: #222230;
   --color-studio-selected: #2d2450;
   --color-canvas-bg: #09090f;
+  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
 * {
@@ -86,4 +89,53 @@ button {
 .page-scroll {
   overflow: auto;
   height: 100%;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Landing page */
+.landing-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+}
+
+.landing-orb {
+  animation: landing-drift 18s ease-in-out infinite;
+}
+
+.landing-orb-delayed {
+  animation: landing-drift 22s ease-in-out infinite reverse;
+}
+
+.landing-float-chip {
+  animation: landing-float 5s ease-in-out infinite;
+}
+
+.landing-float-chip-delayed {
+  animation: landing-float 5s ease-in-out infinite 1.2s;
+}
+
+.landing-ticker {
+  animation: landing-ticker 28s linear infinite;
+}
+
+.landing-mockup {
+  animation: landing-float 8s ease-in-out infinite;
+}
+
+@keyframes landing-drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -20px) scale(1.05); }
+}
+
+@keyframes landing-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes landing-ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
