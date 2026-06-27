@@ -45,10 +45,9 @@ const BENTO = [
 export default function HomePage() {
   return (
     <div className="page-scroll min-h-screen bg-[#07070b] text-studio-text">
-      <div className="landing-grain pointer-events-none fixed inset-0 z-50 opacity-[0.35]" />
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="landing-orb absolute -left-[20%] top-[10%] h-[500px] w-[500px] rounded-full bg-violet-700/20 blur-[120px]" />
-        <div className="landing-orb-delayed absolute -right-[10%] top-[40%] h-[400px] w-[400px] rounded-full bg-rose-600/10 blur-[100px]" />
+        <div className="landing-orb absolute -left-[20%] top-[10%] h-[500px] w-[500px] rounded-full bg-violet-700/15 blur-[100px]" />
+        <div className="landing-orb-delayed absolute -right-[10%] top-[40%] h-[400px] w-[400px] rounded-full bg-rose-600/8 blur-[80px]" />
       </div>
 
       {/* Nav */}
